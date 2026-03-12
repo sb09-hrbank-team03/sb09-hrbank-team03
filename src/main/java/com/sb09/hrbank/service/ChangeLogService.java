@@ -1,8 +1,10 @@
 package com.sb09.hrbank.service;
 
-import org.springframework.stereotype.Service;
+import com.sb09.hrbank.dto.response.ChangeLogDetailDto;
+import java.time.Instant;
 
-@Service
-public class ChangeLogService {
+public interface ChangeLogService {
+  Long getCount(Instant fromDate, Instant toDate);
+  ChangeLogDetailDto getDetails(Long id);
 
 }
