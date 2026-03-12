@@ -35,3 +35,10 @@ out/
 
 ### VS Code ###
 .vscode/
+
+### OS files ###
+.DS_Store
+Thumb.db
+
+### Log files ###
+*.log
