@@ -3,6 +3,8 @@ package com.sb09.hrbank.entity;
 import com.sb09.hrbank.entity.base.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -18,7 +20,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ChangeLog extends BaseEntity {
 
-  @Column(columnDefinition = "TEXT", nullable = false)
+  @Enumerated(EnumType.STRING)
+  @Column(name = "change_type", length = 50, nullable = false)
   private ChangeType type;
 
   @ManyToOne(fetch = FetchType.LAZY)
