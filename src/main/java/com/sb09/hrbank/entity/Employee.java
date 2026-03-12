@@ -1,5 +1,6 @@
 package com.sb09.hrbank.entity;
 
+import com.sb09.hrbank.entity.base.BaseUpdatableEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
@@ -23,19 +24,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @Table(name = "employees")
 @EntityListeners(AuditingEntityListener.class)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Employee {
-
-  @Id
-  @UuidGenerator
-  private UUID id;
-
-  @CreatedDate
-  @Column(name = "created_at", nullable = false, updatable = false)
-  private Instant createdAt;
-
-  @LastModifiedDate
-  @Column(name = "updated_at")
-  private Instant updatedAt;
+public class Employee extends BaseUpdatableEntity {
 
   @Column(name = "hire_date", nullable = false)
   private LocalDate hireDate;
