@@ -17,7 +17,7 @@ import lombok.NoArgsConstructor;
 public class ChangeLogDetail extends BaseEntity {
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "history_id", nullable = false, columnDefinition = "uuid")
+  @JoinColumn(name = "history_id", nullable = false)
   private ChangeLog changeLog;
 
   @Column(columnDefinition = "TEXT", nullable = false)

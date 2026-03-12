@@ -46,10 +46,10 @@ public class Employee extends BaseUpdatableEntity {
   private WorkStatus status;
 
   @Column(name = "department_id", nullable = false)
-  private UUID departmentId;
+  private Long departmentId;
 
   @Column(name = "profile_id")
-  private UUID profileImageId;
+  private Long profileImageId;
 
   private Employee(
       LocalDate hireDate,
@@ -58,8 +58,8 @@ public class Employee extends BaseUpdatableEntity {
       String employeeNumber,
       String position,
       WorkStatus status,
-      UUID departmentId,
-      UUID profileImageId
+      Long departmentId,
+      Long profileImageId
   ) {
     this.hireDate = hireDate;
     this.name = name;
@@ -77,8 +77,8 @@ public class Employee extends BaseUpdatableEntity {
       String email,
       String employeeNumber,
       String position,
-      UUID departmentId,
-      UUID profileImageId
+      Long departmentId,
+      Long profileImageId
   ) {
     return new Employee(
         hireDate,
@@ -92,7 +92,7 @@ public class Employee extends BaseUpdatableEntity {
     );
   }
 
-  public void updateProfileImage(UUID profileImageId) {
+  public void updateProfileImage(Long profileImageId) {
     this.profileImageId = profileImageId;
   }
 }

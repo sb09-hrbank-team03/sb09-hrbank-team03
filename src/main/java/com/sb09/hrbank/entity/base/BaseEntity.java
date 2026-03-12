@@ -21,9 +21,9 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 public abstract class BaseEntity {
 
   @Id
-  @GeneratedValue(strategy = GenerationType.UUID)
-  @Column(columnDefinition = "uuid", updatable = false, nullable = false)
-  private UUID id;
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Column(updatable = false, nullable = false)
+  private Long id;
 
   @CreatedDate
   @Column(columnDefinition = "timestamp with time zone", updatable = false, nullable = false)
