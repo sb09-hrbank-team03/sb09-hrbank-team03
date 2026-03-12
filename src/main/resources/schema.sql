@@ -57,6 +57,7 @@ ALTER TABLE employee_histories
 CREATE TABLE employee_history_details
 (
     id uuid PRIMARY KEY,
+    created_at timestamptz NOT NULL,
     property varchar(100) NOT NULL,
     before_value varchar(100),
     after_value varchar(100),
