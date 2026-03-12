@@ -9,7 +9,7 @@ CREATE TABLE employees
     employee_number varchar(100) UNIQUE NOT NULL,
     position varchar(50) NOT NULL,
     work_status varchar(50) NOT NULL,
-    department_id bigint NOt NULL,
+    department_id bigint NOT NULL,
     profile_id bigint UNIQUE
 );
 
