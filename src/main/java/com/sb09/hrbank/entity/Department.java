@@ -1,5 +1,6 @@
 package com.sb09.hrbank.entity;
 
+import com.sb09.hrbank.entity.base.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
