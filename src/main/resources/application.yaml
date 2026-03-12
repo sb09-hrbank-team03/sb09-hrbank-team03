@@ -1,3 +1,31 @@
+server:
+  port: ${PORT:8080}
+hrbank:
+  storage:
+    type: local
+    local:
+      root-path: ./storage
+    servlet:
+      multipart:
+        max-file-size: 10MB
+        max-request-size: 10MB
 spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/hrbank
+    username: hrbank_user
+    password: hrbank1234
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: create # create / validate
+    show-sql: false
+    defer-datasource-initialization: true
   application:
     name: hrbank
+
+logging:
+  level:
+    org.hibernate.SQL: debug
+    org.hibernate.orm.jdbc.bind: trace
