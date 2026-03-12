@@ -7,7 +7,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.MappedSuperclass;
 import java.time.Instant;
-import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -29,4 +28,3 @@ public abstract class BaseEntity {
   @Column(columnDefinition = "timestamp with time zone", updatable = false, nullable = false)
   private Instant createdAt;
 }
-
