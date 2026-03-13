@@ -3,6 +3,7 @@ package com.sb09.hrbank.controller;
 import com.sb09.hrbank.dto.common.CursorPageResponse;
 import com.sb09.hrbank.dto.request.ChangeLogListRequest;
 import com.sb09.hrbank.dto.response.ChangeLogDetailDto;
+import com.sb09.hrbank.dto.response.ChangeLogDto;
 import com.sb09.hrbank.service.ChangeLogService;
 import java.time.Instant;
 import lombok.RequiredArgsConstructor;
@@ -21,7 +22,7 @@ public class ChangeLogController {
 
   @GetMapping("")
   public ResponseEntity<?> history(ChangeLogListRequest request){
-    CursorPageResponse dto = changeLogService.history(request);
+    CursorPageResponse<ChangeLogDto> dto = changeLogService.history(request);
     return ResponseEntity.ok(dto);
   }
 
@@ -35,12 +36,10 @@ public class ChangeLogController {
 
   @GetMapping("/count")
   public ResponseEntity<Long> getCount(
-   @RequestParam Instant fromDate,
-   @RequestParam Instant toDate
+   @RequestParam(required = false) Instant fromDate,
+   @RequestParam(required = false) Instant toDate
   ){
      Long count = changeLogService.getCount(fromDate, toDate);
      return ResponseEntity.ok(count);
   }
-
-
 }
