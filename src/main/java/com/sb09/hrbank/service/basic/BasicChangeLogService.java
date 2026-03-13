@@ -12,6 +12,7 @@ import com.sb09.hrbank.repository.ChangeLogDetailRepository;
 import com.sb09.hrbank.repository.ChangeLogRepository;
 import com.sb09.hrbank.service.ChangeLogService;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -32,7 +33,15 @@ public class BasicChangeLogService implements ChangeLogService {
   @Transactional(readOnly = true)
   @Override
   public Long getCount(Instant fromDate, Instant toDate) {
-    return 0L;
+    if(fromDate == null){
+      // 기본 일주일 전
+      fromDate = toDate.minus(7, ChronoUnit.DAYS);
+    }
+    if(toDate == null){
+      // 기본 오늘
+      toDate = Instant.now();
+    }
+    return changeLogRepository.countChangeLogByDuration(fromDate, toDate);
   }
 
   @Transactional(readOnly = true)
