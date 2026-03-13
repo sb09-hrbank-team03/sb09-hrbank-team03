@@ -1,6 +1,6 @@
 package com.sb09.hrbank.entity;
 
-import com.sb09.hrbank.entity.base.BaseEntity;
+import com.sb09.hrbank.entity.base.BaseUpdatableEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @Table(name = "departments")
 @NoArgsConstructor(access = lombok.AccessLevel.PROTECTED)
-public class Department extends BaseEntity {
+public class Department extends BaseUpdatableEntity {
 
   @Column(unique = true, nullable = false, length = 100)
   private String name;
