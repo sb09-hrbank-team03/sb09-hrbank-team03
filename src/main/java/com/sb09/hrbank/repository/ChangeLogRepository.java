@@ -11,10 +11,7 @@ import org.springframework.data.repository.query.Param;
 
 public interface ChangeLogRepository extends JpaRepository<ChangeLog, UUID> {
 
-  Long countChangeLogByDuration(
-      @Param("fromDate") Instant fromDate,
-      @Param("toDate") Instant toDate
-  );
+  Long countByCreatedAtBetween(Instant fromDate, Instant toDate);
 
   @Query("SELECT c From ChangeLog c "
       + "WHERE (:employeeNumber is NULL OR c.employeeNumber LIKE %:employeeNumber%) "
