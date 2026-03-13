@@ -6,6 +6,9 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
 import lombok.AccessLevel;
@@ -39,8 +42,9 @@ public class Employee extends BaseUpdatableEntity {
   @Column(name = "work_status", nullable = false, length = 50)
   private WorkStatus status;
 
-  @Column(name = "department_id", nullable = false)
-  private Long departmentId;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "department_id", nullable = false)
+  private Department department;
 
   @Column(name = "profile_id")
   private Long profileImageId;
@@ -52,7 +56,7 @@ public class Employee extends BaseUpdatableEntity {
       String employeeNumber,
       String position,
       WorkStatus status,
-      Long departmentId,
+      Department department,
       Long profileImageId
   ) {
     this.hireDate = hireDate;
@@ -61,7 +65,7 @@ public class Employee extends BaseUpdatableEntity {
     this.employeeNumber = employeeNumber;
     this.position = position;
     this.status = status;
-    this.departmentId = departmentId;
+    this.department = department;
     this.profileImageId = profileImageId;
   }
 
@@ -71,7 +75,7 @@ public class Employee extends BaseUpdatableEntity {
       String email,
       String employeeNumber,
       String position,
-      Long departmentId,
+      Department department,
       Long profileImageId
   ) {
     return new Employee(
@@ -81,7 +85,7 @@ public class Employee extends BaseUpdatableEntity {
         employeeNumber,
         position,
         WorkStatus.ACTIVE,
-        departmentId,
+        department,
         profileImageId
     );
   }
