@@ -17,7 +17,7 @@ public class ChangeLogListRequest {
   private Instant atTo;
   private Long idAfter;
   private String cursor;
-  private int size = 10;
-  private String sortField = "at";
-  private String sortDirection = "desc";
+  private Integer size;
+  private String sortField;
+  private String sortDirection;
 }
