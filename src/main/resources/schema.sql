@@ -1,6 +1,6 @@
 CREATE TABLE employees
 (
-    id uuid PRIMARY KEY,
+    id bigint PRIMARY KEY,
     created_at timestamptz NOT NULL,
     updated_at timestamptz,
     hire_date date NOT NULL,
@@ -9,8 +9,8 @@ CREATE TABLE employees
     employee_number varchar(100) UNIQUE NOT NULL,
     position varchar(50) NOT NULL,
     work_status varchar(50) NOT NULL,
-    department_id uuid NOt NULL,
-    profile_id uuid UNIQUE
+    department_id bigint NOT NULL,
+    profile_id bigint UNIQUE
 );
 
 -- departmnet_id fk 설정
@@ -29,7 +29,7 @@ ALTER TABLE employees
 
 CREATE TABLE departments
 (
-    id uuid PRIMARY KEY,
+    id bigint PRIMARY KEY,
     created_at timestamptz NOT NULL,
     updated_at timestamptz,
     name varchar(100) UNIQUE NOT NULL,
@@ -39,13 +39,13 @@ CREATE TABLE departments
 
 CREATE TABLE employee_histories
 (
-    id uuid PRIMARY_KEY,
+    id bigint PRIMARY_KEY,
     created_at timestamptz NOT NULL,
     change_type varchar(50) NOT NULL,
     ip_address varchar(50) NOT NULL,
     memo varchar(255),
     employee_number varchar(100) NOT NULL,
-    employee_id uuid
+    employee_id bigint
 );
 -- employee_id fk 설정
 ALTER TABLE employee_histories
@@ -56,12 +56,12 @@ ALTER TABLE employee_histories
 
 CREATE TABLE employee_history_details
 (
-    id uuid PRIMARY KEY,
+    id bigint PRIMARY KEY,
     created_at timestamptz NOT NULL,
     property varchar(100) NOT NULL,
     before_value varchar(100),
     after_value varchar(100),
-    history_id uuid NOT NULL
+    history_id bigint NOT NULL
 );
 -- history_id fk 설정
 ALTER TABLE employee_history_details
@@ -72,12 +72,12 @@ ALTER TABLE employee_history_details
 
 CREATE TABLE backups
 (
-    id uuid PRIMARY KEY,
+    id bigint PRIMARY KEY,
     ip_address varchar(50) NOT NULL,
     backup_status varchar(50) NOT NULL,
     started_at timestamptz NOT NULL,
     ended_at timestamptz NOT NULL,
-    file_id uuid
+    file_id bigint
 );
 -- file_id fk 설정
 ALTER TABLE backups
@@ -88,7 +88,7 @@ ALTER TABLE backups
 
 CREATE TABLE binary_contents
 (
-    id uuid PRIMARY KEY,
+    id bigint PRIMARY KEY,
     created_at timestamptz NOT NULL,
     file_name varchar(255) NOT NULL,
     size bigint NOT NULL,
