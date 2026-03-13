@@ -25,7 +25,7 @@ public class ChangeLog extends BaseEntity {
   private ChangeType type;
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "employee_id", columnDefinition = "uuid")
+  @JoinColumn(name = "employee_id")
   private Employee employee;
 
   @Column(columnDefinition = "TEXT", nullable = false)
