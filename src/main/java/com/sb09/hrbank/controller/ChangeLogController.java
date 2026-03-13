@@ -1,5 +1,7 @@
 package com.sb09.hrbank.controller;
 
+import com.sb09.hrbank.dto.common.CursorPageResponse;
+import com.sb09.hrbank.dto.request.ChangeLogListRequest;
 import com.sb09.hrbank.dto.response.ChangeLogDetailDto;
 import com.sb09.hrbank.service.ChangeLogService;
 import java.time.Instant;
@@ -18,22 +20,9 @@ public class ChangeLogController {
   private final ChangeLogService changeLogService;
 
   @GetMapping("")
-  public ResponseEntity<?> list(
-      @RequestParam String employeeNumber,
-      @RequestParam String type,
-      @RequestParam String memo,
-      @RequestParam String ipAddress,
-      @RequestParam String atFrom,
-      @RequestParam String atTo,
-      @RequestParam int idAfter,
-      @RequestParam String cursor,
-      @RequestParam int size,
-      @RequestParam String sortField,
-      @RequestParam String sortDirection
-  ){
-
-   // changeLogService.list();
-    //return ResponseEntity.ok();
+  public ResponseEntity<?> history(ChangeLogListRequest request){
+    CursorPageResponse dto = changeLogService.history(request);
+    return ResponseEntity.ok(dto);
   }
 
   @GetMapping("/{id}")
