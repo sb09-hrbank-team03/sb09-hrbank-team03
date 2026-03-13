@@ -17,13 +17,13 @@ import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
 public class BasicEmployeeService implements EmployeeService {
 
   private final DepartmentRepository departmentRepository;
   private final EmployeeRepository employeeRepository;
 
   @Override
+  @Transactional
   public EmployeeDto create(EmployeeCreateRequest request, MultipartFile profileImage) {
     if (employeeRepository.existsByEmail(request.email())) {
       throw new IllegalArgumentException("이미 사용 중인 이메일입니다.");
@@ -38,12 +38,14 @@ public class BasicEmployeeService implements EmployeeService {
   }
 
   @Override
+  @Transactional(readOnly = true)
   public EmployeeDto findById(Long id) {
     return employeeRepository.findEmployeeDtoById(id)
         .orElseThrow(() -> new NoSuchElementException("해당 직원을 찾을 수 없습니다. id=" + id));
   }
 
   @Override
+  @Transactional
   public EmployeeDto update(Long id, EmployeeUpdateRequest request, MultipartFile profileImage) {
     Employee employee = employeeRepository.findById(id)
         .orElseThrow(() -> new NoSuchElementException("해당 직원을 찾을 수 없습니다. id=" + id));
@@ -68,7 +70,23 @@ public class BasicEmployeeService implements EmployeeService {
       employee.updateProfileImage(profileImageId);
     }
 
-    return findById(id);
+    return toDto(employee);
+  }
+
+  private EmployeeDto toDto(Employee employee) {
+    Department department = employee.getDepartment();
+    return new EmployeeDto(
+        employee.getId(),
+        employee.getName(),
+        employee.getEmail(),
+        employee.getEmployeeNumber(),
+        department.getId(),
+        department.getName(),
+        employee.getPosition(),
+        employee.getHireDate(),
+        employee.getStatus(),
+        employee.getProfileImageId()
+    );
   }
 
 
