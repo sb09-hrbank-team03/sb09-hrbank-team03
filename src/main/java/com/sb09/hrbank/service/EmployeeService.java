@@ -2,10 +2,11 @@ package com.sb09.hrbank.service;
 
 import com.sb09.hrbank.dto.request.EmployeeCreateRequest;
 import com.sb09.hrbank.dto.response.EmployeeDto;
+import org.springframework.web.multipart.MultipartFile;
 
 public interface EmployeeService {
 
-  EmployeeDto create(EmployeeCreateRequest request);
+  EmployeeDto create(EmployeeCreateRequest request, MultipartFile profileImage);
 
-  EmployeeDto getById(Long id);
+  EmployeeDto findById(Long id);
 }
