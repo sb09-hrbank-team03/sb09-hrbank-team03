@@ -2,52 +2,78 @@ package com.sb09.hrbank.service.basic;
 
 import com.sb09.hrbank.dto.request.EmployeeCreateRequest;
 import com.sb09.hrbank.dto.response.EmployeeDto;
+import com.sb09.hrbank.entity.Department;
 import com.sb09.hrbank.entity.Employee;
+import com.sb09.hrbank.repository.DepartmentRepository;
 import com.sb09.hrbank.repository.EmployeeRepository;
 import com.sb09.hrbank.service.EmployeeService;
+import java.time.LocalDate;
+import java.util.NoSuchElementException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @RequiredArgsConstructor
 public class BasicEmployeeService implements EmployeeService {
 
+  private final DepartmentRepository departmentRepository;
   private final EmployeeRepository employeeRepository;
 
   @Override
-  public EmployeeDto create(EmployeeCreateRequest request) {
+  public EmployeeDto create(EmployeeCreateRequest request, MultipartFile profileImage) {
     if (employeeRepository.existsByEmail(request.email())) {
       throw new IllegalArgumentException("이미 사용 중인 이메일입니다.");
     }
 
-    Employee employee = Employee.create(
+    Department department = departmentRepository.findById(request.departmentId())
+        .orElseThrow(() -> new NoSuchElementException("해당 부서를 찾을 수 없습니다. id=" + request.departmentId()));
+    Long profileImageId = getProfileImageId(profileImage);
+
+    Employee savedEmployee = employeeRepository.save(createEmployee(request, department, profileImageId));
+    return findById(savedEmployee.getId());
+  }
+
+  @Override
+  public EmployeeDto findById(Long id) {
+    return employeeRepository.findEmployeeDtoById(id)
+        .orElseThrow(() -> new NoSuchElementException("해당 직원을 찾을 수 없습니다. id=" + id));
+  }
+
+
+  private Employee createEmployee(EmployeeCreateRequest request, Department department, Long profileImageId) {
+    return Employee.create(
         request.hireDate(),
         request.name(),
         request.email(),
-        generateEmployeeNumber(),
+        generateEmployeeNumber(request.hireDate()),
         request.position(),
-        request.departmentId(),
-        null
-    );
-
-    Employee savedEmployee = employeeRepository.save(employee);
-
-    return new EmployeeDto(
-        savedEmployee.getId(),
-        savedEmployee.getName(),
-        savedEmployee.getEmail(),
-        savedEmployee.getEmployeeNumber(),
-        savedEmployee.getDepartmentId(),
-        null,
-        savedEmployee.getPosition(),
-        savedEmployee.getHireDate(),
-        savedEmployee.getStatus(),
-        savedEmployee.getProfileImageId()
+        department,
+        profileImageId
     );
   }
 
-  private String generateEmployeeNumber() {
-    long count = employeeRepository.count() + 1;
-    return "EMP-" + String.format("%06d", count);
+  private Long getProfileImageId(MultipartFile profileImage) {
+    if (profileImage == null || profileImage.isEmpty()) {
+      return null;
+    }
+    return null;
+  }
+
+  private int extractSequence(String employeeNumber) {
+    String[] parts = employeeNumber.split("-");
+    return Integer.parseInt(parts[2]);
+  }
+
+  private String generateEmployeeNumber(LocalDate hireDate) {
+    String year = String.valueOf(hireDate.getYear());
+    String prefix = "EMP-" + year + "-";
+
+    int nextSequence = employeeRepository
+        .findTopByEmployeeNumberStartingWithOrderByEmployeeNumberDesc(prefix)
+        .map(employee -> extractSequence(employee.getEmployeeNumber()) + 1)
+        .orElse(1);
+
+    return prefix + String.format("%03d", nextSequence);
   }
 }
