@@ -6,4 +6,6 @@ import com.sb09.hrbank.dto.response.EmployeeDto;
 public interface EmployeeService {
 
   EmployeeDto create(EmployeeCreateRequest request);
+
+  EmployeeDto getById(Long id);
 }
