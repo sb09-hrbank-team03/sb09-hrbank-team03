@@ -53,9 +53,15 @@ public class BasicChangeLogService implements ChangeLogService {
   @Transactional(readOnly = true)
   @Override
   public CursorPageResponse<ChangeLogDto> history(ChangeLogListRequest request) {
-
-    Sort sort = Sort.by(Sort.Direction.fromString(request.getSortDirection()), request.getSortField())
-        .and(Sort.by(Sort.Direction.DESC, "id"));
+    Sort sort;
+    if(request.getSortField().equals("ipAddress")){
+      sort = Sort.by(Sort.Direction.fromString(request.getSortDirection()), "ipAddress")
+          .and(Sort.by(Sort.Direction.DESC, "id"));
+    }
+    else{
+      sort = Sort.by(Sort.Direction.fromString(request.getSortDirection()), "createdAt")
+          .and(Sort.by(Sort.Direction.DESC, "id"));
+    }
     Pageable pageable = PageRequest.of(0, request.getSize(), sort);
     Slice<ChangeLog> logSlice = changeLogRepository.findAllByCondition(
         request.getEmployeeNumber(),
