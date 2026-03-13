@@ -76,7 +76,7 @@ CREATE TABLE backups
     ip_address varchar(50) NOT NULL,
     backup_status varchar(50) NOT NULL,
     started_at timestamptz NOT NULL,
-    ended_at timestamptz NOT NULL,
+    ended_at timestamptz,
     file_id bigint
 );
 -- file_id fk 설정
