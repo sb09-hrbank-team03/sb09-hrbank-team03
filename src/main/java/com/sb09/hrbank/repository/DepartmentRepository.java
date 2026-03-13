@@ -8,5 +8,6 @@ public interface DepartmentRepository extends JpaRepository<Department, Long> {
 
   boolean existsByName(String name);
 
-  List<Department> findByNameContainingOrDescriptionContaining(String name, String description);
+  List<Department> findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase(String name,
+      String description);
 }
