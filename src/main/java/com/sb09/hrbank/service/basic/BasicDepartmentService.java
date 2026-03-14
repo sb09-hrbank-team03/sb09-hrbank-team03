@@ -15,6 +15,7 @@ public class BasicDepartmentService implements DepartmentService {
 
   private final DepartmentRepository departmentRepository;
 
+  @Override
   public void createDepartment(DepartmentCreateRequest request) {
 
     boolean isDuplicate = departmentRepository.existsByName(request.name());
