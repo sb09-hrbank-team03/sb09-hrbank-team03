@@ -17,7 +17,7 @@ public class BasicDepartmentService implements DepartmentService {
   private final DepartmentMapper departmentMapper;
 
   @Override
-  public void createDepartment(DepartmentCreateRequest request) {
+  public Department createDepartment(DepartmentCreateRequest request) {
 
     boolean isDuplicate = departmentRepository.existsByName(request.name());
 
@@ -27,6 +27,6 @@ public class BasicDepartmentService implements DepartmentService {
 
     Department newDepartment = departmentMapper.toEntity(request);
 
-    departmentRepository.save(newDepartment);
+    return departmentRepository.save(newDepartment);
   }
 }

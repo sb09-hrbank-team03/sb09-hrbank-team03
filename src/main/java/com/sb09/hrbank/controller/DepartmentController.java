@@ -1,6 +1,7 @@
 package com.sb09.hrbank.controller;
 
 import com.sb09.hrbank.dto.request.DepartmentCreateRequest;
+import com.sb09.hrbank.entity.Department;
 import com.sb09.hrbank.service.DepartmentService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -20,9 +21,9 @@ public class DepartmentController {
 
   @PostMapping
   @ResponseStatus(HttpStatus.CREATED)
-  public void createDepartment(
+  public Department createDepartment(
       @Valid @RequestBody DepartmentCreateRequest request
   ) {
-    departmentService.createDepartment(request);
+    return departmentService.createDepartment(request);
   }
 }
