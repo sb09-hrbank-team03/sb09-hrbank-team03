@@ -7,7 +7,8 @@ public record DepartmentResponse(
     Long id,
     String name,
     String description,
-    LocalDate establishedDate
+    LocalDate establishedDate,
+    Integer employeeCount
 ) {
 
 }

@@ -10,5 +10,5 @@ public interface DepartmentMapper {
 
   Department toEntity(DepartmentCreateRequest request);
 
-  DepartmentResponse toDto(Department entity);
+  DepartmentResponse toDto(Department entity, Integer employeeCount);
 }
