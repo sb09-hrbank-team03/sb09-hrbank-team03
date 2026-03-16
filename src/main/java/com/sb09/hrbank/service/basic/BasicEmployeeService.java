@@ -15,6 +15,7 @@ import com.sb09.hrbank.repository.EmployeeRepository;
 import com.sb09.hrbank.service.EmployeeService;
 import com.sb09.hrbank.service.FileService;
 import java.time.LocalDate;
+import java.util.Objects;
 import java.util.NoSuchElementException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -60,6 +61,8 @@ public class BasicEmployeeService implements EmployeeService {
   public EmployeeDto update(Long id, EmployeeUpdateRequest request, MultipartFile profileImage) {
     Employee employee = employeeRepository.findById(id)
         .orElseThrow(() -> new NoSuchElementException("해당 직원을 찾을 수 없습니다. id=" + id));
+    Long previousProfileImageId = employee.getProfileImageId();
+
     if (employeeRepository.existsByEmailAndIdNot(request.email(), id)) {
       throw new IllegalArgumentException("이미 사용 중인 이메일입니다.");
     }
@@ -77,6 +80,9 @@ public class BasicEmployeeService implements EmployeeService {
     );
     if (profileImageId != null) {
       employee.updateProfileImage(profileImageId);
+      if (!Objects.equals(previousProfileImageId, profileImageId)) {
+        deleteProfileImageSafely(id, previousProfileImageId);
+      }
     }
     return employeeMapper.toDto(employee);
   }
@@ -88,14 +94,19 @@ public class BasicEmployeeService implements EmployeeService {
         .orElseThrow(() -> new NoSuchElementException("해당 직원을 찾을 수 없습니다. id=" + id));
     Long profileImageId = employee.getProfileImageId();
     employeeRepository.delete(employee);
-    if (profileImageId != null) {
-      try {
-        fileService.delete(profileImageId);
-      } catch (NoSuchElementException e) {
-        log.warn("프로필 이미지가 이미 삭제됐습니다. employeeId={}, profileImageId={}", id, profileImageId);
-      } catch (RuntimeException e) {
-        log.error("프로필 이미지 삭제 중 오류가 발생했습니다. employeeId={}, profileImageId={}", id, profileImageId, e);
-      }
+    deleteProfileImageSafely(id, profileImageId);
+  }
+
+  private void deleteProfileImageSafely(Long employeeId, Long profileImageId) {
+    if (profileImageId == null) {
+      return;
+    }
+    try {
+      fileService.delete(profileImageId);
+    } catch (NoSuchElementException e) {
+      log.warn("프로필 이미지가 이미 삭제됐습니다. employeeId={}, profileImageId={}", employeeId, profileImageId);
+    } catch (RuntimeException e) {
+      log.error("프로필 이미지 삭제 중 오류가 발생했습니다. employeeId={}, profileImageId={}", employeeId, profileImageId, e);
     }
   }
 
@@ -112,7 +123,7 @@ public class BasicEmployeeService implements EmployeeService {
   }
 
   private Object getCursorValue(EmployeeDto dto, EmployeeSearchRequest request) {
-    var sortBy = request.getSortBy();
+    EmployeeSortField sortBy = request.getSortBy();
     if (sortBy == null) {
       sortBy = EmployeeSortField.hireDate;
     }

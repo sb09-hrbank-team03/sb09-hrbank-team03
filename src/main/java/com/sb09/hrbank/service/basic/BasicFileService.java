@@ -7,10 +7,14 @@ import com.sb09.hrbank.storage.FileStorage;
 import java.nio.file.Path;
 import java.util.NoSuchElementException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.web.multipart.MultipartFile;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class BasicFileService implements FileService {
@@ -22,33 +26,25 @@ public class BasicFileService implements FileService {
 
   @Override
   public Resource download(Long id) {
-    FileMeta file = repository.findById(id)
-        .orElseThrow(() -> new NoSuchElementException("해당 파일을 찾을 수 없습니다. id=" + id));
+    FileMeta file = findFile(id);
     return storage.load(file.getPath());
   }
 
   @Override
   public void delete(Long id) {
-    FileMeta file = repository.findById(id)
-        .orElseThrow(() -> new NoSuchElementException("해당 파일을 찾을 수 없습니다. id=" + id));
+    FileMeta file = findFile(id);
     try {
       storage.delete(file.getPath());
-    } catch (NoSuchElementException e) {
-      // 파일이 존재하지 않는 경우에도 메타데이터는 삭제하도록 처리
+    } catch (RuntimeException e) {
+      log.warn("파일 삭제 중 오류가 발생했습니다. 메타데이터는 계속 삭제합니다. id={}, path={}", id, file.getPath(), e);
+    } finally {
+      repository.deleteById(id);
     }
-    repository.deleteById(id);
   }
 
   @Override
   public FileMeta save(Path path) {
-
-    FileMeta file = new FileMeta(
-        path.getFileName().toString(),
-        path.toFile().length(),
-        "text/csv",
-        path.toString()
-    );
-    return repository.save(file);
+    return repository.save(toFileMeta(path, path.toFile().length(), "text/csv"));
   }
 
   @Override
@@ -63,12 +59,52 @@ public class BasicFileService implements FileService {
     }
 
     Path savedPath = storage.store(profileImage, PROFILE_IMAGES_DIR);
-    FileMeta file = new FileMeta(
-        savedPath.getFileName().toString(),
-        profileImage.getSize(),
+
+    if (TransactionSynchronizationManager.isSynchronizationActive()) {
+      registerRollbackCleanup(savedPath);
+    }
+
+    FileMeta file = toFileMeta(savedPath, profileImage.getSize(), contentType);
+    try {
+      return repository.save(file);
+    } catch (RuntimeException e) {
+      if (!TransactionSynchronizationManager.isSynchronizationActive()) {
+        deleteStoredFileQuietly(savedPath);
+      }
+      throw e;
+    }
+  }
+
+  private void registerRollbackCleanup(Path savedPath) {
+    TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+      @Override
+      public void afterCompletion(int status) {
+        if (status == STATUS_ROLLED_BACK) {
+          deleteStoredFileQuietly(savedPath);
+        }
+      }
+    });
+  }
+
+  private void deleteStoredFileQuietly(Path savedPath) {
+    try {
+      storage.delete(savedPath.toString());
+    } catch (RuntimeException e) {
+      log.warn("롤백 보상 파일 삭제에 실패했습니다. path={}", savedPath, e);
+    }
+  }
+
+  private FileMeta findFile(Long id) {
+    return repository.findById(id)
+        .orElseThrow(() -> new NoSuchElementException("해당 파일을 찾을 수 없습니다. id=" + id));
+  }
+
+  private FileMeta toFileMeta(Path path, long size, String contentType) {
+    return new FileMeta(
+        path.getFileName().toString(),
+        size,
         contentType,
-        savedPath.toString()
+        path.toString()
     );
-    return repository.save(file);
   }
 }

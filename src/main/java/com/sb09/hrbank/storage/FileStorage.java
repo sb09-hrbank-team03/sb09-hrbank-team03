@@ -9,13 +9,18 @@ import java.util.NoSuchElementException;
 import java.util.UUID;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
 @Component
 public class FileStorage {
 
-  private static final Path ROOT_PATH = Path.of("storage");
+  private final Path rootPath;
+
+  public FileStorage(@Value("${hr_bank.storage.local.root-path:./storage}") String rootPath) {
+    this.rootPath = Path.of(rootPath).toAbsolutePath().normalize();
+  }
 
   public Resource load(String path) {
     return new FileSystemResource(path);
@@ -34,7 +39,7 @@ public class FileStorage {
 
   public Path store(MultipartFile file, String directory) {
     try {
-      Path targetDirectory = ROOT_PATH.resolve(directory).normalize().toAbsolutePath();
+      Path targetDirectory = resolveDirectory(directory);
       Files.createDirectories(targetDirectory);
 
       String extension = extractExtension(file.getOriginalFilename());
@@ -49,6 +54,10 @@ public class FileStorage {
     } catch (IOException e) {
       throw new RuntimeException("파일 저장 중 I/O 오류가 발생했습니다.", e);
     }
+  }
+
+  private Path resolveDirectory(String directory) {
+    return rootPath.resolve(directory).normalize();
   }
 
   private String extractExtension(String fileName) {
