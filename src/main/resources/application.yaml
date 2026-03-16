@@ -11,9 +11,9 @@ hr_bank:
         max-request-size: 10MB
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/hr_bank
-    username: hr_user
-    password: 1234
+    url: jdbc:postgresql://localhost:5432/hrbank
+    username: hrbank_user
+    password: hrbank1234
     driver-class-name: org.postgresql.Driver
 
   jpa:
