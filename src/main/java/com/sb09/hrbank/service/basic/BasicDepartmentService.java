@@ -1,6 +1,8 @@
 package com.sb09.hrbank.service.basic;
 
 
+
+import com.sb09.hrbank.dto.common.DepartmentResponse;
 import com.sb09.hrbank.dto.request.DepartmentCreateRequest;
 import com.sb09.hrbank.entity.Department;
 import com.sb09.hrbank.mapper.DepartmentMapper;
@@ -17,7 +19,7 @@ public class BasicDepartmentService implements DepartmentService {
   private final DepartmentMapper departmentMapper;
 
   @Override
-  public Department createDepartment(DepartmentCreateRequest request) {
+  public DepartmentResponse createDepartment(DepartmentCreateRequest request) {
 
     boolean isDuplicate = departmentRepository.existsByName(request.name());
 
@@ -27,6 +29,8 @@ public class BasicDepartmentService implements DepartmentService {
 
     Department newDepartment = departmentMapper.toEntity(request);
 
-    return departmentRepository.save(newDepartment);
+    Department savedDepartment = departmentRepository.save(newDepartment);
+
+    return departmentMapper.toDto(savedDepartment);
   }
 }
