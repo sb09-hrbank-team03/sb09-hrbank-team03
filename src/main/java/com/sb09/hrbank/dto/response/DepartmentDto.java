@@ -1,8 +1,8 @@
-package com.sb09.hrbank.dto.common;
+package com.sb09.hrbank.dto.response;
 
 import java.time.LocalDate;
 
-public record DepartmentResponse(
+public record DepartmentDto(
 
     Long id,
     String name,
