@@ -1,6 +1,7 @@
 package com.sb09.hrbank.service.basic;
 
 import com.sb09.hrbank.dto.request.DepartmentUpdateRequest;
+import java.util.NoSuchElementException;
 import org.springframework.transaction.annotation.Transactional;
 import com.sb09.hrbank.dto.response.DepartmentDto;
 import com.sb09.hrbank.dto.request.DepartmentCreateRequest;
@@ -24,7 +25,7 @@ public class BasicDepartmentService implements DepartmentService {
     boolean isDuplicate = departmentRepository.existsByName(request.name());
 
     if (isDuplicate) {
-      throw new IllegalArgumentException("이미 존재하는 부서 이름입니다.");
+      throw new NoSuchElementException("이미 존재하는 부서 이름입니다.");
     }
 
     Department newDepartment = departmentMapper.toEntity(request);
@@ -39,12 +40,12 @@ public class BasicDepartmentService implements DepartmentService {
   public DepartmentDto update(Long id, DepartmentUpdateRequest request) {
 
     Department department = departmentRepository.findById(id)
-        .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 부서입니다."));
+        .orElseThrow(() -> new NoSuchElementException("존재하지 않는 부서입니다."));
 
     if (!department.getName().equals(request.name())) {
       boolean isDuplicate = departmentRepository.existsByName(request.name());
       if (isDuplicate) {
-        throw new IllegalArgumentException("이미 존재하는 부서 이름입니다.");
+        throw new NoSuchElementException("이미 존재하는 부서 이름입니다.");
       }
     }
 
