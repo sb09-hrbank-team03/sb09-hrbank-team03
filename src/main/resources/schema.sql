@@ -1,3 +1,34 @@
+-- 기존 테이블 삭제 (재실행 가능하게)
+DROP TABLE IF EXISTS employee_history_details CASCADE;
+DROP TABLE IF EXISTS employee_histories CASCADE;
+DROP TABLE IF EXISTS employees CASCADE;
+DROP TABLE IF EXISTS backups CASCADE;
+DROP TABLE IF EXISTS departments CASCADE;
+DROP TABLE IF EXISTS binary_contents CASCADE;
+
+-- 1. binary_contents
+CREATE TABLE binary_contents
+(
+    id bigint PRIMARY KEY,
+    created_at timestamptz NOT NULL,
+    file_name varchar(255) NOT NULL,
+    size bigint NOT NULL,
+    content_type varchar(100) NOT NULL,
+    path varchar(255) NOT NULL
+);
+
+-- 2. departments
+CREATE TABLE departments
+(
+    id bigint PRIMARY KEY,
+    created_at timestamptz NOT NULL,
+    updated_at timestamptz,
+    name varchar(100) UNIQUE NOT NULL,
+    description varchar(255),
+    established_date date NOT NULL
+);
+
+-- 3. employees
 CREATE TABLE employees
 (
     id bigint PRIMARY KEY,
@@ -13,33 +44,22 @@ CREATE TABLE employees
     profile_id bigint UNIQUE
 );
 
--- departmnet_id fk 설정
 ALTER TABLE employees
     ADD CONSTRAINT fk_department_id
         FOREIGN KEY (department_id)
             REFERENCES departments (id)
             ON DELETE CASCADE;
 
--- profile_id fk 설정
 ALTER TABLE employees
     ADD CONSTRAINT fk_profile_id
         FOREIGN KEY (profile_id)
             REFERENCES binary_contents (id)
             ON DELETE SET NULL;
 
-CREATE TABLE departments
-(
-    id bigint PRIMARY KEY,
-    created_at timestamptz NOT NULL,
-    updated_at timestamptz,
-    name varchar(100) UNIQUE NOT NULL,
-    description varchar(255),
-    established_date date NOT NULL
-);
-
+-- 4. employee_histories
 CREATE TABLE employee_histories
 (
-    id bigint PRIMARY_KEY,
+    id bigint PRIMARY KEY,
     created_at timestamptz NOT NULL,
     change_type varchar(50) NOT NULL,
     ip_address varchar(50) NOT NULL,
@@ -47,13 +67,14 @@ CREATE TABLE employee_histories
     employee_number varchar(100) NOT NULL,
     employee_id bigint
 );
--- employee_id fk 설정
+
 ALTER TABLE employee_histories
     ADD CONSTRAINT fk_employee_id
         FOREIGN KEY (employee_id)
             REFERENCES employees (id)
             ON DELETE SET NULL;
 
+-- 5. employee_history_details
 CREATE TABLE employee_history_details
 (
     id bigint PRIMARY KEY,
@@ -61,15 +82,17 @@ CREATE TABLE employee_history_details
     property varchar(100) NOT NULL,
     before_value varchar(100),
     after_value varchar(100),
+    started_at timestamptz NOT NULL,
     history_id bigint NOT NULL
 );
--- history_id fk 설정
+
 ALTER TABLE employee_history_details
     ADD CONSTRAINT fk_history_id
         FOREIGN KEY (history_id)
             REFERENCES employee_histories (id)
             ON DELETE CASCADE;
 
+-- 6. backups
 CREATE TABLE backups
 (
     id bigint PRIMARY KEY,
@@ -79,24 +102,14 @@ CREATE TABLE backups
     ended_at timestamptz,
     file_id bigint
 );
--- file_id fk 설정
+
 ALTER TABLE backups
     ADD CONSTRAINT fk_file_id
         FOREIGN KEY (file_id)
             REFERENCES binary_contents (id)
             ON DELETE SET NULL;
 
-CREATE TABLE binary_contents
-(
-    id bigint PRIMARY KEY,
-    created_at timestamptz NOT NULL,
-    file_name varchar(255) NOT NULL,
-    size bigint NOT NULL,
-    content_type varchar(100) NOT NULL,
-    path varchar(255) NOT NULL
-);
-
--- Backup 제약조건
+-- 7. 제약조건
 CREATE UNIQUE INDEX unique_backup_in_progress
     ON backups (backup_status)
     WHERE backup_status = 'IN_PROGRESS';

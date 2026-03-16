@@ -41,7 +41,7 @@ public class BasicChangeLogService implements ChangeLogService {
       // 기본 오늘
       toDate = Instant.now();
     }
-    return changeLogRepository.countChangeLogByDuration(fromDate, toDate);
+    return changeLogRepository.countByCreatedAtBetween(fromDate, toDate);
   }
 
   @Transactional(readOnly = true)
