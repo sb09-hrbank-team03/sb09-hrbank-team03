@@ -19,7 +19,8 @@ public interface ChangeLogService {
   ChangeLog createByCreate(Employee employee, String ipAddress, String memo);
   ChangeLog createByUpdate(Employee employee, String ipAddress, EmployeeUpdateRequest request);
   ChangeLog createByDelete(Employee employee, String ipAddress, String memo);
-  void addByCreate(List<ChangeLogDetail> detail,Employee employee);
-  void addByUpdate(List<ChangeLogDetail> detail,Employee employee,EmployeeUpdateRequest request);
-  void addByDelete(List<ChangeLogDetail> detail,Employee employee);
+  void addByCreate(List<ChangeLogDetail> details,Employee employee, ChangeLog changeLog);
+  void addByUpdate(List<ChangeLogDetail> details,Employee employee,EmployeeUpdateRequest request, ChangeLog changeLog);
+  void addByDelete(List<ChangeLogDetail> details,Employee employee, ChangeLog changeLog);
+  void addDetail(List<ChangeLogDetail> details, ChangeLog changeLog, String property, String before, String after);
 }

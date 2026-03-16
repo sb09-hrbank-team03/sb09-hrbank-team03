@@ -9,6 +9,7 @@ import com.sb09.hrbank.dto.response.DiffDto;
 import com.sb09.hrbank.entity.ChangeLog;
 import com.sb09.hrbank.entity.ChangeLogDetail;
 import com.sb09.hrbank.entity.ChangeType;
+import com.sb09.hrbank.entity.Department;
 import com.sb09.hrbank.entity.Employee;
 import com.sb09.hrbank.mapper.ChangeLogDetailMapper;
 import com.sb09.hrbank.mapper.ChangeLogMapper;
@@ -16,6 +17,7 @@ import com.sb09.hrbank.mapper.CursorPageResponseMapper;
 import com.sb09.hrbank.repository.ChangeLogDetailRepository;
 import com.sb09.hrbank.repository.ChangeLogRepository;
 import com.sb09.hrbank.repository.ChangeLogSpecification;
+import com.sb09.hrbank.repository.DepartmentRepository;
 import com.sb09.hrbank.service.ChangeLogService;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -37,6 +39,7 @@ public class BasicChangeLogService implements ChangeLogService {
 
   private final ChangeLogRepository changeLogRepository;
   private final ChangeLogDetailRepository changeLogDetailRepository;
+  private final DepartmentRepository departmentRepository;
   private final CursorPageResponseMapper cursorPageResponseMapper;
   private final ChangeLogMapper changeLogMapper;
   private final ChangeLogDetailMapper changeLogDetailMapper;
@@ -110,9 +113,9 @@ public class BasicChangeLogService implements ChangeLogService {
     ChangeLog changeLog = new ChangeLog(ChangeType.CREATED, employee, ipAddress, memo, employeeNumber);
     ChangeLog saved = changeLogRepository.save(changeLog);
 
-    List<ChangeLogDetail> detail = new ArrayList<>();
-    addByCreate(detail,employee);
-    changeLogDetailRepository.saveAll(detail);
+    List<ChangeLogDetail> details = new ArrayList<>();
+    addByCreate(details,employee, changeLog);
+    changeLogDetailRepository.saveAll(details);
     return saved;
   }
   // 업데이트 전에 실행
@@ -123,9 +126,9 @@ public class BasicChangeLogService implements ChangeLogService {
     ChangeLog changeLog = new ChangeLog(ChangeType.UPDATED, employee, ipAddress, memo, employeeNumber);
     ChangeLog saved = changeLogRepository.save(changeLog);
 
-    List<ChangeLogDetail> detail = new ArrayList<>();
-    addByUpdate(detail, employee, request);
-    changeLogDetailRepository.saveAll(detail);
+    List<ChangeLogDetail> details = new ArrayList<>();
+    addByUpdate(details, employee, request, changeLog);
+    changeLogDetailRepository.saveAll(details);
     return saved;
   }
   // 삭제 전에 실행
@@ -135,26 +138,55 @@ public class BasicChangeLogService implements ChangeLogService {
     ChangeLog changeLog = new ChangeLog(ChangeType.DELETED, employee, ipAddress, memo, employeeNumber);
     ChangeLog saved = changeLogRepository.save(changeLog);
 
-    List<ChangeLogDetail> detail = new ArrayList<>();
-    addByDelete(detail, employee);
-    changeLogDetailRepository.saveAll(detail);
+    List<ChangeLogDetail> details = new ArrayList<>();
+    addByDelete(details, employee, changeLog);
+    changeLogDetailRepository.saveAll(details);
     return saved;
   }
 
   @Override
-  public void addByCreate(List<ChangeLogDetail> detail, Employee employee) {
+  public void addByCreate(List<ChangeLogDetail> details, Employee employee, ChangeLog changeLog) {
+    addDetail(details, changeLog, "입사일", "-", employee.getHireDate().toString());
+    addDetail(details, changeLog, "이름", "-", employee.getName());
+    addDetail(details, changeLog, "직함", "-", employee.getPosition());
+    addDetail(details, changeLog, "부서", "-", employee.getDepartment().getName());
+    addDetail(details, changeLog, "이메일", "-", employee.getEmail());
+    addDetail(details, changeLog, "사번", "-", employee.getEmployeeNumber());
+    addDetail(details, changeLog, "상태", "-", employee.getStatus().toString());
+  }
+
+  @Override
+  public void addByUpdate(List<ChangeLogDetail> details, Employee employee,
+      EmployeeUpdateRequest request, ChangeLog changeLog) {
+    if(request.hireDate()!=null) addDetail(details, changeLog, "입사일", employee.getHireDate().toString(), request.hireDate().toString());
+    if(request.name()!=null) addDetail(details, changeLog, "이름", employee.getName(), request.name());
+    if(request.position()!=null) addDetail(details, changeLog, "직함", employee.getPosition(), request.position());
+    if(request.departmentId()!=null){
+      Department department = departmentRepository.findById(request.departmentId()).orElseThrow(() -> new NoSuchElementException("id에 해당하는 부서가 존재하지 않습니다."));
+      String departmentName = department.getName();
+      addDetail(details, changeLog, "부서", employee.getDepartment().getName(), departmentName);
+    }
+    if(request.email()!=null) addDetail(details, changeLog, "이메일", employee.getEmail(), request.email());
+    if(request.status()!=null) addDetail(details, changeLog, "상태", employee.getStatus().toString(), request.status().toString());
+  }
+
+  @Override
+  public void addByDelete(List<ChangeLogDetail> details, Employee employee, ChangeLog changeLog) {
+    addDetail(details, changeLog, "입사일",  employee.getHireDate().toString(), "-");
+    addDetail(details, changeLog, "이름",  employee.getName(), "-");
+    addDetail(details, changeLog, "직함",  employee.getPosition(), "-");
+    addDetail(details, changeLog, "부서",  employee.getDepartment().getName(), "-");
+    addDetail(details, changeLog, "이메일",  employee.getEmail(), "-");
+    addDetail(details, changeLog, "사번",  employee.getEmployeeNumber(), "-");
+    addDetail(details, changeLog, "상태",  employee.getStatus().toString(), "-");
 
   }
 
   @Override
-  public void addByUpdate(List<ChangeLogDetail> detail, Employee employee,
-      EmployeeUpdateRequest request) {
-
-  }
-
-  @Override
-  public void addByDelete(List<ChangeLogDetail> detail, Employee employee) {
-
+  public void addDetail(List<ChangeLogDetail> details, ChangeLog changeLog, String property, String before,
+      String after) {
+    ChangeLogDetail detail = new ChangeLogDetail(changeLog, property, before, after);
+    details.add(detail);
   }
 
 }
