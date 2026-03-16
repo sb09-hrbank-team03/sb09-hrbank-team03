@@ -21,6 +21,7 @@ import java.nio.file.Path;
 import java.time.Instant;
 import java.util.List;
 
+import java.util.NoSuchElementException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -83,10 +84,6 @@ public class BasicBackupService implements BackupService {
     return backupMapper.toDto(history);
   }
 
-  /**
-   * STEP1
-   * 최근 완료된 백업 이후 직원 데이터 변경 여부 확인
-   */
   private boolean isBackupRequired() {
 
     return backupRepository
@@ -109,9 +106,19 @@ public class BasicBackupService implements BackupService {
     );
   }
 
-  /**
-   * STEP3 실제 백업 수행 (Cursor 기반 조회)
-   */
+  @Override
+  @Transactional(readOnly = true)
+  public BackupDto getLatestBackup(BackupStatus status) {
+
+    BackupHistory history = backupRepository
+        .findFirstByBackupStatusOrderByStartedAtDesc(status)
+        .orElseThrow(() ->
+            new NoSuchElementException("해당 상태의 백업 이력이 없습니다. status=" + status));
+
+    return backupMapper.toDto(history);
+  }
+
+
   private FileMeta executeBackup() throws IOException {
 
     Path path = csvBackupWriter.createCsv();
