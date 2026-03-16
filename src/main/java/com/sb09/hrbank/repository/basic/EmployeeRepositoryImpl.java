@@ -12,6 +12,7 @@ import com.sb09.hrbank.entity.QDepartment;
 import com.sb09.hrbank.entity.QEmployee;
 import com.sb09.hrbank.repository.EmployeeRepositoryCustom;
 import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -137,8 +138,13 @@ public class EmployeeRepositoryImpl implements EmployeeRepositoryCustom {
       case employeeNumber -> compareWithTieBreaker(employee.employeeNumber, request.getCursor(),
           request.getLastElementId(), sortDirection);
       case hireDate -> {
-        LocalDate cursorDate = LocalDate.parse(request.getCursor());
-        yield compareWithTieBreaker(employee.hireDate, cursorDate, request.getLastElementId(), sortDirection);
+        try {
+          LocalDate cursorDate = LocalDate.parse(request.getCursor());
+          yield compareWithTieBreaker(employee.hireDate, cursorDate,
+              request.getLastElementId(), sortDirection);
+        } catch (DateTimeParseException e) {
+          throw new IllegalArgumentException("입사일 커서 형식이 올바르지 않습니다. cursor=" + request.getCursor(), e);
+        }
       }
     };
   }

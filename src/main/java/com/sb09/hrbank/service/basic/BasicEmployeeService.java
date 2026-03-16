@@ -3,6 +3,7 @@ package com.sb09.hrbank.service.basic;
 import com.sb09.hrbank.dto.common.CursorPageResponse;
 import com.sb09.hrbank.dto.request.EmployeeCreateRequest;
 import com.sb09.hrbank.dto.request.EmployeeSearchRequest;
+import com.sb09.hrbank.dto.request.EmployeeSortField;
 import com.sb09.hrbank.dto.request.EmployeeUpdateRequest;
 import com.sb09.hrbank.dto.response.EmployeeDto;
 import com.sb09.hrbank.entity.Department;
@@ -42,9 +43,6 @@ public class BasicEmployeeService implements EmployeeService {
         .findById(request.departmentId())
         .orElseThrow(() -> new NoSuchElementException("해당 부서를 찾을 수 없습니다. id=" + request.departmentId()));
     Long profileImageId = getProfileImageId(profileImage);
-    if (profileImage != null && !profileImage.isEmpty() && profileImageId == null) {
-      throw new UnsupportedOperationException("프로필 이미지 업로드 기능이 아직 구현되지 않았습니다.");
-    }
     Employee savedEmployee = employeeRepository.save(createEmployee(request, department, profileImageId));
     return employeeMapper.toDto(savedEmployee);
   }
@@ -69,9 +67,6 @@ public class BasicEmployeeService implements EmployeeService {
         .findById(request.departmentId())
         .orElseThrow(() -> new NoSuchElementException("해당 부서를 찾을 수 없습니다. id=" + request.departmentId()));
     Long profileImageId = getProfileImageId(profileImage);
-    if (profileImage != null && !profileImage.isEmpty() && profileImageId == null) {
-      throw new UnsupportedOperationException("프로필 이미지 업로드 기능이 아직 구현되지 않았습니다.");
-    }
     employee.update(
         request.hireDate(),
         request.name(),
@@ -97,7 +92,9 @@ public class BasicEmployeeService implements EmployeeService {
       try {
         fileService.delete(profileImageId);
       } catch (NoSuchElementException e) {
-        log.warn("프로필 이미지가 이미 삭제되어 있습니다. employeeId={}, profileImageId={}", id, profileImageId);
+        log.warn("프로필 이미지가 이미 삭제됐습니다. employeeId={}, profileImageId={}", id, profileImageId);
+      } catch (RuntimeException e) {
+        log.error("프로필 이미지 삭제 중 오류가 발생했습니다. employeeId={}, profileImageId={}", id, profileImageId, e);
       }
     }
   }
@@ -115,7 +112,11 @@ public class BasicEmployeeService implements EmployeeService {
   }
 
   private Object getCursorValue(EmployeeDto dto, EmployeeSearchRequest request) {
-    return switch (request.getSortBy()) {
+    var sortBy = request.getSortBy();
+    if (sortBy == null) {
+      sortBy = EmployeeSortField.hireDate;
+    }
+    return switch (sortBy) {
       case name -> dto.name();
       case employeeNumber -> dto.employeeNumber();
       case hireDate -> dto.hireDate() != null ? dto.hireDate().toString() : null;
@@ -138,7 +139,7 @@ public class BasicEmployeeService implements EmployeeService {
     if (profileImage == null || profileImage.isEmpty()) {
       return null;
     }
-    return null;
+    return fileService.saveProfileImage(profileImage).getId();
   }
 
   private int extractSequence(String employeeNumber) {
