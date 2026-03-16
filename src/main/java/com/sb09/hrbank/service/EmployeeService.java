@@ -1,6 +1,8 @@
 package com.sb09.hrbank.service;
 
+import com.sb09.hrbank.dto.common.CursorPageResponse;
 import com.sb09.hrbank.dto.request.EmployeeCreateRequest;
+import com.sb09.hrbank.dto.request.EmployeeSearchRequest;
 import com.sb09.hrbank.dto.request.EmployeeUpdateRequest;
 import com.sb09.hrbank.dto.response.EmployeeDto;
 import org.springframework.web.multipart.MultipartFile;
@@ -12,6 +14,8 @@ public interface EmployeeService {
   EmployeeDto update(Long id, EmployeeUpdateRequest request, MultipartFile profileImage);
 
   EmployeeDto findById(Long id);
+
+  CursorPageResponse<EmployeeDto> findAll(EmployeeSearchRequest request);
 
   void delete(Long id);
 }

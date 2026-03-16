@@ -1,14 +1,18 @@
 package com.sb09.hrbank.controller;
 
+import com.sb09.hrbank.dto.common.CursorPageResponse;
 import com.sb09.hrbank.dto.request.EmployeeCreateRequest;
+import com.sb09.hrbank.dto.request.EmployeeSearchRequest;
 import com.sb09.hrbank.dto.request.EmployeeUpdateRequest;
 import com.sb09.hrbank.dto.response.EmployeeDto;
 import com.sb09.hrbank.service.EmployeeService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -32,6 +36,14 @@ public class EmployeeController {
       @RequestPart(value = "profileImage", required = false) MultipartFile profileImage
   ) {
     return employeeService.create(request, profileImage);
+  }
+
+  @GetMapping
+  public CursorPageResponse<EmployeeDto> findAll(
+      @Valid
+      @ModelAttribute EmployeeSearchRequest request
+  ) {
+    return employeeService.findAll(request);
   }
 
   @GetMapping("/{id}")
