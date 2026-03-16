@@ -20,4 +20,6 @@ public interface DepartmentService {
 
   DepartmentResponse updateDepartment(Long id, DepartmentCreateRequest request);
 
+  void deleteDepartment(Long id);
+
 }
