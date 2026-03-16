@@ -2,7 +2,6 @@ package com.sb09.hrbank.controller;
 
 import com.sb09.hrbank.dto.common.DepartmentResponse;
 import com.sb09.hrbank.dto.request.DepartmentCreateRequest;
-import com.sb09.hrbank.entity.Department;
 import com.sb09.hrbank.service.DepartmentService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
