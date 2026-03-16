@@ -93,4 +93,20 @@ public class Employee extends BaseUpdatableEntity {
   public void updateProfileImage(Long profileImageId) {
     this.profileImageId = profileImageId;
   }
+
+  public void update(
+      LocalDate hireDate,
+      String name,
+      String email,
+      String position,
+      WorkStatus status,
+      Department department
+  ) {
+    this.hireDate = hireDate;
+    this.name = name;
+    this.email = email;
+    this.position = position;
+    this.status = status;
+    this.department = department;
+  }
 }
