@@ -34,6 +34,9 @@ public class BasicEmployeeService implements EmployeeService {
     Department department = departmentRepository.findById(request.departmentId())
         .orElseThrow(() -> new NoSuchElementException("해당 부서를 찾을 수 없습니다. id=" + request.departmentId()));
     Long profileImageId = getProfileImageId(profileImage);
+    if (profileImage != null && !profileImage.isEmpty() && profileImageId == null) {
+      throw new UnsupportedOperationException("프로필 이미지 업로드 기능이 아직 구현되지 않았습니다.");
+    }
 
     Employee savedEmployee = employeeRepository.save(createEmployee(request, department, profileImageId));
     return employeeMapper.toDto(savedEmployee);
@@ -60,6 +63,9 @@ public class BasicEmployeeService implements EmployeeService {
     Department department = departmentRepository.findById(request.departmentId())
         .orElseThrow(() -> new NoSuchElementException("해당 부서를 찾을 수 없습니다. id=" + request.departmentId()));
     Long profileImageId = getProfileImageId(profileImage);
+    if (profileImage != null && !profileImage.isEmpty() && profileImageId == null) {
+      throw new UnsupportedOperationException("프로필 이미지 업로드 기능이 아직 구현되지 않았습니다.");
+    }
 
     employee.update(
         request.hireDate(),
