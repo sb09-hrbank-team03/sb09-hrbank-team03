@@ -28,6 +28,7 @@ public class BasicEmployeeService implements EmployeeService {
   private final EmployeeRepository employeeRepository;
   private final EmployeeMapper employeeMapper;
   private final FileService fileService;
+
   private final ChangeLogService changeLogService;
 
   @Override

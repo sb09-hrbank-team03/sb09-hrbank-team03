@@ -55,6 +55,7 @@ public class BasicChangeLogService implements ChangeLogService {
       // 기본 일주일 전
       fromDate = toDate.minus(7, ChronoUnit.DAYS);
     }
+
     return changeLogRepository.countByCreatedAtBetween(fromDate, toDate);
   }
 

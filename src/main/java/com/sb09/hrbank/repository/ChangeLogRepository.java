@@ -3,7 +3,6 @@ package com.sb09.hrbank.repository;
 import com.sb09.hrbank.entity.ChangeLog;
 import com.sb09.hrbank.entity.ChangeType;
 import java.time.Instant;
-import java.util.UUID;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -15,4 +14,5 @@ import org.springframework.data.repository.query.Param;
 public interface ChangeLogRepository extends JpaRepository<ChangeLog, Long>,
     JpaSpecificationExecutor<ChangeLog> {
   Long countByCreatedAtBetween(Instant fromDate, Instant toDate);
+
 }
