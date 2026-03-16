@@ -19,7 +19,7 @@ public class BasicDepartmentService implements DepartmentService {
   private final DepartmentMapper departmentMapper;
 
   @Override
-  public DepartmentResponse createDepartment(DepartmentCreateRequest request) {
+  public DepartmentResponse create(DepartmentCreateRequest request) {
 
     boolean isDuplicate = departmentRepository.existsByName(request.name());
 
@@ -36,7 +36,7 @@ public class BasicDepartmentService implements DepartmentService {
 
   @Override
   @Transactional
-  public DepartmentResponse updateDepartment(Long id, DepartmentUpdateRequest request) {
+  public DepartmentResponse update(Long id, DepartmentUpdateRequest request) {
 
     Department department = departmentRepository.findById(id)
         .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 부서입니다."));
@@ -54,7 +54,7 @@ public class BasicDepartmentService implements DepartmentService {
 
   @Override
   @Transactional
-  public void deleteDepartment(Long id) {
+  public void delete(Long id) {
     if (!departmentRepository.existsById(id)) {
       throw new IllegalArgumentException("존재하지 않는 부서입니다.");
     }

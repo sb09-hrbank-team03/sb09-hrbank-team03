@@ -7,10 +7,10 @@ import com.sb09.hrbank.entity.Department;
 
 public interface DepartmentService {
 
-  DepartmentResponse createDepartment(DepartmentCreateRequest request);
+  DepartmentResponse create(DepartmentCreateRequest request);
 
-  DepartmentResponse updateDepartment(Long id, DepartmentUpdateRequest request);
+  DepartmentResponse update(Long id, DepartmentUpdateRequest request);
 
-  void deleteDepartment(Long id);
+  void delete(Long id);
 
 }

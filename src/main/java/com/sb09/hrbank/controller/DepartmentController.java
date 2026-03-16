@@ -28,7 +28,7 @@ public class DepartmentController {
   public DepartmentResponse createDepartment(
       @Valid @RequestBody DepartmentCreateRequest request
   ) {
-    return departmentService.createDepartment(request);
+    return departmentService.create(request);
   }
 
   @PutMapping("/{id}")
@@ -36,12 +36,12 @@ public class DepartmentController {
       @PathVariable Long id,
       @Valid @RequestBody DepartmentUpdateRequest request
   ) {
-    return departmentService.updateDepartment(id, request);
+    return departmentService.update(id, request);
   }
 
   @DeleteMapping("/{id}")
   @ResponseStatus(HttpStatus.NO_CONTENT)
   public void deleteDepartment(@PathVariable Long id) {
-    departmentService.deleteDepartment(id);
+    departmentService.delete(id);
   }
 }
