@@ -25,6 +25,14 @@ public class BasicFileService implements FileService {
   }
 
   @Override
+  public void delete(Long id) {
+    FileMeta file = repository.findById(id)
+        .orElseThrow(() -> new NoSuchElementException("해당 파일을 찾을 수 없습니다. id=" + id));
+    storage.delete(file.getPath());
+    repository.deleteById(id);
+  }
+
+  @Override
   public FileMeta save(Path path) {
 
     FileMeta file = new FileMeta(
@@ -33,7 +41,6 @@ public class BasicFileService implements FileService {
         "text/csv",
         path.toString()
     );
-
     return repository.save(file);
   }
 }
