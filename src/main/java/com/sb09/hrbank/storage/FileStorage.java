@@ -10,4 +10,5 @@ public class FileStorage {
   public Resource load(String path) {
     return new FileSystemResource(path);
   }
+
 }

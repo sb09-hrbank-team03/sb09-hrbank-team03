@@ -7,6 +7,7 @@ import com.sb09.hrbank.service.EmployeeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -45,5 +46,10 @@ public class EmployeeController {
       @RequestPart(value = "profileImage", required = false) MultipartFile profileImage
   ) {
     return employeeService.update(id, request, profileImage);
+  }
+
+  @DeleteMapping("/{id}")
+  public void delete(@PathVariable Long id) {
+    employeeService.delete(id);
   }
 }

@@ -9,6 +9,7 @@ import com.sb09.hrbank.mapper.EmployeeMapper;
 import com.sb09.hrbank.repository.DepartmentRepository;
 import com.sb09.hrbank.repository.EmployeeRepository;
 import com.sb09.hrbank.service.EmployeeService;
+import com.sb09.hrbank.service.FileService;
 import java.time.LocalDate;
 import java.util.NoSuchElementException;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +24,7 @@ public class BasicEmployeeService implements EmployeeService {
   private final DepartmentRepository departmentRepository;
   private final EmployeeRepository employeeRepository;
   private final EmployeeMapper employeeMapper;
+  private final FileService fileService;
 
   @Override
   @Transactional
@@ -31,7 +33,8 @@ public class BasicEmployeeService implements EmployeeService {
       throw new IllegalArgumentException("이미 사용 중인 이메일입니다.");
     }
 
-    Department department = departmentRepository.findById(request.departmentId())
+    Department department = departmentRepository
+        .findById(request.departmentId())
         .orElseThrow(() -> new NoSuchElementException("해당 부서를 찾을 수 없습니다. id=" + request.departmentId()));
     Long profileImageId = getProfileImageId(profileImage);
     if (profileImage != null && !profileImage.isEmpty() && profileImageId == null) {
@@ -60,7 +63,8 @@ public class BasicEmployeeService implements EmployeeService {
       throw new IllegalArgumentException("이미 사용 중인 이메일입니다.");
     }
 
-    Department department = departmentRepository.findById(request.departmentId())
+    Department department = departmentRepository
+        .findById(request.departmentId())
         .orElseThrow(() -> new NoSuchElementException("해당 부서를 찾을 수 없습니다. id=" + request.departmentId()));
     Long profileImageId = getProfileImageId(profileImage);
     if (profileImage != null && !profileImage.isEmpty() && profileImageId == null) {
@@ -80,6 +84,20 @@ public class BasicEmployeeService implements EmployeeService {
     }
 
     return employeeMapper.toDto(employee);
+  }
+
+  @Override
+  @Transactional
+  public void delete(Long id) {
+    Employee employee = employeeRepository.findById(id)
+        .orElseThrow(() -> new NoSuchElementException("해당 직원을 찾을 수 없습니다. id=" + id));
+
+    Long profileImageId = employee.getProfileImageId();
+    employeeRepository.delete(employee);
+
+    if (profileImageId != null) {
+      fileService.delete(profileImageId);
+    }
   }
 
   private Employee createEmployee(EmployeeCreateRequest request, Department department, Long profileImageId) {
