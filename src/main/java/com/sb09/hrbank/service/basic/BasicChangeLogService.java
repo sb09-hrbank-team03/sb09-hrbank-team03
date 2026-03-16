@@ -83,10 +83,6 @@ public class BasicChangeLogService implements ChangeLogService {
     }
     Pageable pageable = PageRequest.of(0, size, sort);
     Slice<ChangeLog> logSlice;
-    ChangeType type = null;
-    if (request.type() != null && !request.type().isEmpty()) {
-      type = ChangeType.valueOf(request.type());
-    }
     logSlice = changeLogRepository.findAll(
         ChangeLogSpecification.build(request),
         pageable

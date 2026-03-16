@@ -2,9 +2,12 @@ package com.sb09.hrbank.service.basic;
 
 import com.sb09.hrbank.dto.request.EmployeeCreateRequest;
 import com.sb09.hrbank.dto.request.EmployeeUpdateRequest;
+import com.sb09.hrbank.dto.response.EmployeeDistributionDto;
 import com.sb09.hrbank.dto.response.EmployeeDto;
+import com.sb09.hrbank.dto.response.EmployeeTrendDto;
 import com.sb09.hrbank.entity.Department;
 import com.sb09.hrbank.entity.Employee;
+import com.sb09.hrbank.entity.WorkStatus;
 import com.sb09.hrbank.mapper.EmployeeMapper;
 import com.sb09.hrbank.repository.DepartmentRepository;
 import com.sb09.hrbank.repository.EmployeeRepository;
@@ -12,6 +15,8 @@ import com.sb09.hrbank.service.ChangeLogService;
 import com.sb09.hrbank.service.EmployeeService;
 import com.sb09.hrbank.service.FileService;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.NoSuchElementException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -150,5 +155,88 @@ public class BasicEmployeeService implements EmployeeService {
         .orElse(1);
 
     return prefix + String.format("%03d", nextSequence);
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public List<EmployeeTrendDto> trend(LocalDate from, LocalDate to, String unit) {
+    LocalDate now = LocalDate.now();
+    LocalDate toDate = to != null ? to : now;
+    LocalDate fromDate = from != null ? from : switch (unit) {
+      case "day"     -> now.minusDays(12);
+      case "week"    -> now.minusWeeks(12);
+      case "month"   -> now.minusMonths(12);
+      case "quarter" -> now.minusMonths(36);
+      case "year"    -> now.minusYears(12);
+      default        -> now.minusMonths(12);
+    };
+    List<EmployeeTrendDto> result = new ArrayList<>();
+    LocalDate flag = fromDate;
+    Long prevCount = null;
+    while(!flag.isAfter(toDate)){
+      LocalDate nextFlag = switch (unit){
+        case "day"     -> flag.plusDays(1);
+        case "week"    -> flag.plusWeeks(1);
+        case "month"   -> flag.plusMonths(1);
+        case "quarter" -> flag.plusMonths(3);
+        case "year"    -> flag.plusYears(1);
+        default        -> flag.plusMonths(1);
+      };
+      Long count = employeeRepository.countByHireDateLessThanEqual(nextFlag);
+      Long change = prevCount != null ? count - prevCount : 0;
+      double changeRate = prevCount != null && prevCount > 0 ?
+          Math.round((double) change / prevCount * 1000.0) / 10.0 : 0.0;
+      EmployeeTrendDto dto = new EmployeeTrendDto(flag, count, change, changeRate);
+      result.add(dto);
+      prevCount = count;
+      flag = nextFlag;
+    }
+    return result;
+  }
+
+  @Override
+  public List<EmployeeDistributionDto> distribution(String groupBy, String status) {
+    List<EmployeeDistributionDto> dtos = new ArrayList<>();
+    WorkStatus workStatus = WorkStatus.valueOf(status);
+    List<Object[]> countWithGroup = groupBy.equals("position")
+        ? employeeRepository.countGroupByPosition(workStatus)
+        : employeeRepository.countGroupByDepartment(workStatus);
+    Long total = employeeRepository.countByStatus(workStatus);
+    for(Object[] o : countWithGroup){
+      // math.round가 결과가 정수로 나와서 소수점 표현 때문에 100 대신 1000 곱하고 10으로 나눔.
+      double percentage = total != 0 ? Math.round((double) o[1] / total * 1000.0) / 10.0 : 0.0;
+      EmployeeDistributionDto dto = new EmployeeDistributionDto(
+          (String) o[0],
+          (Long) o[1],
+          percentage
+      );
+      dtos.add(dto);
+    }
+    return dtos;
+  }
+
+  @Override
+  public Long count(String status, LocalDate fromDate, LocalDate to) {
+    Long count;
+    LocalDate now = LocalDate.now();
+    LocalDate toDate = to != null ? to : now;
+    if(status != null){
+      WorkStatus workStatus = WorkStatus.valueOf(status);
+      if(fromDate != null){
+        count = employeeRepository.countByHireDateBetweenAndStatus(fromDate, toDate, workStatus);
+      }
+      else{
+        count = employeeRepository.countByStatus(workStatus);
+      }
+    }
+    else{
+      if(fromDate != null){
+        count = employeeRepository.countByHireDateBetween(fromDate, toDate);
+      }
+      else{
+        count = employeeRepository.count();
+      }
+    }
+    return count;
   }
 }

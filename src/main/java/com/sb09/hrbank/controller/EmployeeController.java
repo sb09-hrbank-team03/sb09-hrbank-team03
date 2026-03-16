@@ -2,12 +2,20 @@ package com.sb09.hrbank.controller;
 
 import com.sb09.hrbank.dto.request.EmployeeCreateRequest;
 import com.sb09.hrbank.dto.request.EmployeeUpdateRequest;
+import com.sb09.hrbank.dto.response.EmployeeDistributionDto;
 import com.sb09.hrbank.dto.response.EmployeeDto;
+import com.sb09.hrbank.dto.response.EmployeeTrendDto;
 import com.sb09.hrbank.service.EmployeeService;
 import jakarta.servlet.http.HttpServletRequest;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.util.List;
+import lombok.Builder.Default;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cglib.core.Local;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -16,6 +24,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
@@ -80,5 +89,34 @@ public class EmployeeController {
       clientIp = servletRequest.getRemoteAddr();
     }
     employeeService.delete(id, clientIp);
+  }
+
+  @GetMapping("/status/trend")
+  public ResponseEntity<List<EmployeeTrendDto>> trend(
+      @RequestParam(required = false) LocalDate from,
+      @RequestParam(required = false) LocalDate to,
+      @RequestParam(defaultValue = "month") String unit
+  ){
+    List<EmployeeTrendDto> dtos = employeeService.trend(from, to, unit);
+    return ResponseEntity.ok(dtos);
+  }
+
+  @GetMapping("/status/distribution")
+  public ResponseEntity<List<EmployeeDistributionDto>> distribution(
+      @RequestParam(defaultValue = "department") String groupBy,
+      @RequestParam(defaultValue = "ACTIVE") String status
+  ){
+    List<EmployeeDistributionDto> dtos = employeeService.distribution(groupBy, status);
+    return ResponseEntity.ok(dtos);
+  }
+
+  @GetMapping("/count")
+  public ResponseEntity<Long> count(
+      @RequestParam(required = false) String status,
+      @RequestParam(required = false) LocalDate fromDate,
+      @RequestParam(required = false) LocalDate toDate
+  ){
+    Long count = employeeService.count(status, fromDate, toDate);
+    return ResponseEntity.ok(count);
   }
 }
