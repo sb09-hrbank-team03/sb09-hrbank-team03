@@ -1,6 +1,6 @@
 package com.sb09.hrbank.controller;
 
-import com.sb09.hrbank.dto.common.DepartmentResponse;
+import com.sb09.hrbank.dto.response.DepartmentDto;
 import com.sb09.hrbank.dto.request.DepartmentCreateRequest;
 import com.sb09.hrbank.dto.request.DepartmentUpdateRequest;
 import com.sb09.hrbank.service.DepartmentService;
@@ -25,14 +25,14 @@ public class DepartmentController {
 
   @PostMapping
   @ResponseStatus(HttpStatus.CREATED)
-  public DepartmentResponse createDepartment(
+  public DepartmentDto create(
       @Valid @RequestBody DepartmentCreateRequest request
   ) {
     return departmentService.create(request);
   }
 
   @PutMapping("/{id}")
-  public DepartmentResponse updateDepartment(
+  public DepartmentDto update(
       @PathVariable Long id,
       @Valid @RequestBody DepartmentUpdateRequest request
   ) {
@@ -41,7 +41,7 @@ public class DepartmentController {
 
   @DeleteMapping("/{id}")
   @ResponseStatus(HttpStatus.NO_CONTENT)
-  public void deleteDepartment(@PathVariable Long id) {
+  public void delete(@PathVariable Long id) {
     departmentService.delete(id);
   }
 }
