@@ -20,7 +20,7 @@ public class BasicFileService implements FileService {
   @Override
   public Resource download(Long id) {
     FileMeta file = repository.findById(id)
-        .orElseThrow(() -> new NoSuchElementException("파일 없음"));
+        .orElseThrow(() -> new NoSuchElementException("해당 파일을 찾을 수 없습니다. id=" + id));
     return storage.load(file.getPath());
   }
 
@@ -35,5 +35,13 @@ public class BasicFileService implements FileService {
     );
 
     return repository.save(file);
+  }
+
+  @Override
+  public void delete(Long id) {
+    FileMeta file = repository.findById(id)
+        .orElseThrow(() -> new NoSuchElementException("해당 파일을 찾을 수 없습니다. id=" + id));
+    storage.delete(file.getPath());
+    repository.delete(file);
   }
 }

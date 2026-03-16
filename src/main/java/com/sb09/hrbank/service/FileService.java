@@ -8,4 +8,6 @@ public interface FileService {
   Resource download(Long id);
   FileMeta save(Path path);
 
+
+  void delete(Long id);
 }
