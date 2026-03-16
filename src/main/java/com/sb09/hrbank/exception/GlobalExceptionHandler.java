@@ -34,6 +34,17 @@ public class GlobalExceptionHandler {
 
   }
 
+  @ExceptionHandler(IllegalStateException.class)
+  public ResponseEntity<ErrorResponse> handleException(IllegalStateException e){
+    ErrorResponse response = new ErrorResponse(
+        Instant.now(),
+        HttpStatus.CONFLICT.value(),
+        "요청 충돌",
+        e.getMessage()
+    );
+    return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+  }
+
   @ExceptionHandler(Exception.class)
   public ResponseEntity<ErrorResponse> handleException(Exception e){
     ErrorResponse response = new ErrorResponse(
