@@ -6,7 +6,9 @@ import com.sb09.hrbank.service.DepartmentService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -25,5 +27,13 @@ public class DepartmentController {
       @Valid @RequestBody DepartmentCreateRequest request
   ) {
     return departmentService.createDepartment(request);
+  }
+
+  @PutMapping("/{id}")
+  public DepartmentResponse updateDepartment(
+      @PathVariable Long id,
+      @Valid @RequestBody DepartmentCreateRequest request
+  ) {
+    return departmentService.updateDepartment(id, request);
   }
 }

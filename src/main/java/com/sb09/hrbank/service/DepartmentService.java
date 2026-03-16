@@ -8,4 +8,6 @@ public interface DepartmentService {
 
   DepartmentResponse createDepartment(DepartmentCreateRequest request);
 
+  DepartmentResponse updateDepartment(Long id, DepartmentCreateRequest request);
+
 }
