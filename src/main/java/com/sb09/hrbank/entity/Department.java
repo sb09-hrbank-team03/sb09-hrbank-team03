@@ -1,10 +1,8 @@
 package com.sb09.hrbank.entity;
 
+import com.sb09.hrbank.entity.base.BaseUpdatableEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
 import lombok.Builder;
@@ -16,11 +14,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @Table(name = "departments")
 @NoArgsConstructor(access = lombok.AccessLevel.PROTECTED)
-public class Department extends BaseEntity {
-
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+public class Department extends BaseUpdatableEntity {
 
   @Column(unique = true, nullable = false, length = 100)
   private String name;
