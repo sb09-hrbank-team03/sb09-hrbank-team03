@@ -6,12 +6,21 @@ import com.sb09.hrbank.dto.request.EmployeeUpdateRequest;
 import com.sb09.hrbank.dto.response.ChangeLogDetailDto;
 import com.sb09.hrbank.dto.response.ChangeLogDto;
 import com.sb09.hrbank.entity.ChangeLog;
+import com.sb09.hrbank.entity.ChangeLogDetail;
 import com.sb09.hrbank.entity.ChangeType;
+import com.sb09.hrbank.entity.Employee;
 import java.time.Instant;
+import java.util.List;
 
 public interface ChangeLogService {
   Long getCount(Instant fromDate, Instant toDate);
   ChangeLogDetailDto getDetails(Long id);
   CursorPageResponse<ChangeLogDto> history(ChangeLogListRequest request);
-  ChangeLog create(ChangeType changeType, Long id, EmployeeUpdateRequest request);
+  ChangeLog createByCreate(Employee employee, String ipAddress, String memo);
+  ChangeLog createByUpdate(Employee employee, String ipAddress, EmployeeUpdateRequest request);
+  ChangeLog createByDelete(Employee employee, String ipAddress);
+  void addByCreate(List<ChangeLogDetail> details,Employee employee, ChangeLog changeLog);
+  void addByUpdate(List<ChangeLogDetail> details,Employee employee,EmployeeUpdateRequest request, ChangeLog changeLog);
+  void addByDelete(List<ChangeLogDetail> details,Employee employee, ChangeLog changeLog);
+  void addDetail(List<ChangeLogDetail> details, ChangeLog changeLog, String property, String before, String after);
 }

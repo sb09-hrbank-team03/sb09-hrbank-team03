@@ -1,22 +1,30 @@
 package com.sb09.hrbank.controller;
 
-import com.sb09.hrbank.dto.common.CursorPageResponse;
 import com.sb09.hrbank.dto.request.EmployeeCreateRequest;
-import com.sb09.hrbank.dto.request.EmployeeSearchRequest;
 import com.sb09.hrbank.dto.request.EmployeeUpdateRequest;
+import com.sb09.hrbank.dto.response.EmployeeDistributionDto;
 import com.sb09.hrbank.dto.response.EmployeeDto;
+import com.sb09.hrbank.dto.response.EmployeeTrendDto;
 import com.sb09.hrbank.service.EmployeeService;
-import jakarta.validation.Valid;
+import jakarta.servlet.http.HttpServletRequest;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.util.List;
+import lombok.Builder.Default;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cglib.core.Local;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
@@ -32,18 +40,18 @@ public class EmployeeController {
   @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   @ResponseStatus(HttpStatus.CREATED)
   public EmployeeDto create(
+      @RequestHeader(value = "X-Forwarded-For", required = false) String ip,
+      HttpServletRequest servletRequest,
       @RequestPart("request") EmployeeCreateRequest request,
       @RequestPart(value = "profileImage", required = false) MultipartFile profileImage
   ) {
-    return employeeService.create(request, profileImage);
-  }
-
-  @GetMapping
-  public CursorPageResponse<EmployeeDto> findAll(
-      @Valid
-      @ModelAttribute EmployeeSearchRequest request
-  ) {
-    return employeeService.findAll(request);
+    String clientIp;
+    if (ip != null && !ip.isBlank()) {
+      clientIp = ip.split(",")[0].trim();
+    } else {
+      clientIp = servletRequest.getRemoteAddr();
+    }
+    return employeeService.create(request, profileImage, clientIp);
   }
 
   @GetMapping("/{id}")
@@ -51,18 +59,64 @@ public class EmployeeController {
     return employeeService.findById(id);
   }
 
-  @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+  @PatchMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public EmployeeDto update(
+      @RequestHeader(value = "X-Forwarded-For", required = false) String ip,
+      HttpServletRequest servletRequest,
       @PathVariable Long id,
       @RequestPart("request") EmployeeUpdateRequest request,
       @RequestPart(value = "profileImage", required = false) MultipartFile profileImage
   ) {
-    return employeeService.update(id, request, profileImage);
+    String clientIp;
+    if (ip != null && !ip.isBlank()) {
+      clientIp = ip.split(",")[0].trim();
+    } else {
+      clientIp = servletRequest.getRemoteAddr();
+    }
+    return employeeService.update(id, request, profileImage, clientIp);
   }
 
   @DeleteMapping("/{id}")
   @ResponseStatus(HttpStatus.NO_CONTENT)
-  public void delete(@PathVariable Long id) {
-    employeeService.delete(id);
+  public void delete(
+      @RequestHeader(value = "X-Forwarded-For", required = false) String ip,
+      HttpServletRequest servletRequest, @PathVariable Long id
+  ) {
+    String clientIp;
+    if (ip != null && !ip.isBlank()) {
+      clientIp = ip.split(",")[0].trim();
+    } else {
+      clientIp = servletRequest.getRemoteAddr();
+    }
+    employeeService.delete(id, clientIp);
+  }
+
+  @GetMapping("/stats/trend")
+  public ResponseEntity<List<EmployeeTrendDto>> trend(
+      @RequestParam(required = false) LocalDate from,
+      @RequestParam(required = false) LocalDate to,
+      @RequestParam(defaultValue = "month") String unit
+  ){
+    List<EmployeeTrendDto> dtos = employeeService.trend(from, to, unit);
+    return ResponseEntity.ok(dtos);
+  }
+
+  @GetMapping("/stats/distribution")
+  public ResponseEntity<List<EmployeeDistributionDto>> distribution(
+      @RequestParam(defaultValue = "department") String groupBy,
+      @RequestParam(defaultValue = "ACTIVE") String status
+  ){
+    List<EmployeeDistributionDto> dtos = employeeService.distribution(groupBy, status);
+    return ResponseEntity.ok(dtos);
+  }
+
+  @GetMapping("/count")
+  public ResponseEntity<Long> count(
+      @RequestParam(required = false) String status,
+      @RequestParam(required = false) LocalDate fromDate,
+      @RequestParam(required = false) LocalDate toDate
+  ){
+    Long count = employeeService.count(status, fromDate, toDate);
+    return ResponseEntity.ok(count);
   }
 }

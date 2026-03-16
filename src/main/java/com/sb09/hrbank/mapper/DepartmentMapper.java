@@ -9,6 +9,5 @@ import org.mapstruct.Mapper;
 public interface DepartmentMapper {
 
   Department toEntity(DepartmentCreateRequest request);
-
   DepartmentResponse toDto(Department entity);
 }

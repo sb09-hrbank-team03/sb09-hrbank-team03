@@ -1,0 +1,5 @@
+employeeNumber,name,email,department,title,status,hiredAt
+"EMP-2023-001","신사입당","simsa@example.com","개발팀","선임 개발자","ACTIVE","2023-01-01"
+"EMP-2023-002","전우치","wuchi@example.com","개발팀","선임 개발자","ACTIVE","2023-01-01"
+"EMP-2026-001","홍홍홍","hong@example.com","홍보팀","홍보팀장","ACTIVE","2026-03-10"
+"EMP-2026-002","정약용","jeong@example.com","홍보팀","홍보팀원","ACTIVE","2026-03-15"

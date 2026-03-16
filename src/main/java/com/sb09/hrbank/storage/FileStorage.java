@@ -1,26 +1,15 @@
 package com.sb09.hrbank.storage;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 import java.util.NoSuchElementException;
-import java.util.UUID;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import org.springframework.web.multipart.MultipartFile;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 @Component
 public class FileStorage {
-
-  private final Path rootPath;
-
-  public FileStorage(@Value("${hr_bank.storage.local.root-path:./storage}") String rootPath) {
-    this.rootPath = Path.of(rootPath).toAbsolutePath().normalize();
-  }
 
   public Resource load(String path) {
     return new FileSystemResource(path);
@@ -35,41 +24,5 @@ public class FileStorage {
     } catch (IOException e) {
       throw new RuntimeException("파일 삭제 중 I/O 오류가 발생했습니다. path=" + path, e);
     }
-  }
-
-  public Path store(MultipartFile file, String directory) {
-    try {
-      Path targetDirectory = resolveDirectory(directory);
-      Files.createDirectories(targetDirectory);
-
-      String extension = extractExtension(file.getOriginalFilename());
-      String storedFileName = UUID.randomUUID() + extension;
-      Path targetPath = targetDirectory.resolve(storedFileName);
-
-      try (InputStream inputStream = file.getInputStream()) {
-        Files.copy(inputStream, targetPath, StandardCopyOption.REPLACE_EXISTING);
-      }
-
-      return targetPath;
-    } catch (IOException e) {
-      throw new RuntimeException("파일 저장 중 I/O 오류가 발생했습니다.", e);
-    }
-  }
-
-  private Path resolveDirectory(String directory) {
-    return rootPath.resolve(directory).normalize();
-  }
-
-  private String extractExtension(String fileName) {
-    if (fileName == null || fileName.isBlank()) {
-      return "";
-    }
-
-    int lastDot = fileName.lastIndexOf('.');
-    if (lastDot < 0 || lastDot == fileName.length() - 1) {
-      return "";
-    }
-
-    return fileName.substring(lastDot);
   }
 }
