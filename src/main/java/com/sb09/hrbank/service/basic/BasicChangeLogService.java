@@ -50,6 +50,7 @@ public class BasicChangeLogService implements ChangeLogService {
   @Transactional(readOnly = true)
   @Override
   public ChangeLogDetailDto getDetails(Long id) {
+
     return null;
   }
 
