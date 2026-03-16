@@ -6,6 +6,9 @@ import org.springframework.core.io.Resource;
 
 public interface FileService {
   Resource download(Long id);
+
+  void delete(Long id);
+
   FileMeta save(Path path);
 
 }

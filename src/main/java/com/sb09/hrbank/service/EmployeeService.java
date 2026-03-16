@@ -12,4 +12,6 @@ public interface EmployeeService {
   EmployeeDto update(Long id, EmployeeUpdateRequest request, MultipartFile profileImage);
 
   EmployeeDto findById(Long id);
+
+  void delete(Long id);
 }

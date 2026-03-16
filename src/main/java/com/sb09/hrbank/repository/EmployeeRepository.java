@@ -16,8 +16,6 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
 
   boolean existsByEmailAndIdNot(String email, Long id);
 
-  boolean existsByEmployeeNumber(String employeeNumber);
-
   Optional<Employee> findTopByEmployeeNumberStartingWithOrderByEmployeeNumberDesc(String prefix);
 
   @Query("""
