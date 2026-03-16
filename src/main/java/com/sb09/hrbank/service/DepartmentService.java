@@ -2,13 +2,14 @@ package com.sb09.hrbank.service;
 
 import com.sb09.hrbank.dto.common.DepartmentResponse;
 import com.sb09.hrbank.dto.request.DepartmentCreateRequest;
+import com.sb09.hrbank.dto.request.DepartmentUpdateRequest;
 import com.sb09.hrbank.entity.Department;
 
 public interface DepartmentService {
 
   DepartmentResponse createDepartment(DepartmentCreateRequest request);
 
-  DepartmentResponse updateDepartment(Long id, DepartmentCreateRequest request);
+  DepartmentResponse updateDepartment(Long id, DepartmentUpdateRequest request);
 
   void deleteDepartment(Long id);
 

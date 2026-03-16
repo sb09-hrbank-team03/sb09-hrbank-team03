@@ -2,6 +2,7 @@ package com.sb09.hrbank.controller;
 
 import com.sb09.hrbank.dto.common.DepartmentResponse;
 import com.sb09.hrbank.dto.request.DepartmentCreateRequest;
+import com.sb09.hrbank.dto.request.DepartmentUpdateRequest;
 import com.sb09.hrbank.service.DepartmentService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -33,7 +34,7 @@ public class DepartmentController {
   @PutMapping("/{id}")
   public DepartmentResponse updateDepartment(
       @PathVariable Long id,
-      @Valid @RequestBody DepartmentCreateRequest request
+      @Valid @RequestBody DepartmentUpdateRequest request
   ) {
     return departmentService.updateDepartment(id, request);
   }
