@@ -4,6 +4,7 @@ import com.sb09.hrbank.entity.FileMeta;
 import com.sb09.hrbank.repository.FileMetaRepository;
 import com.sb09.hrbank.service.FileService;
 import com.sb09.hrbank.storage.FileStorage;
+import java.nio.file.Path;
 import java.util.NoSuchElementException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
@@ -19,7 +20,20 @@ public class BasicFileService implements FileService {
   @Override
   public Resource download(Long id) {
     FileMeta file = repository.findById(id)
-        .orElseThrow(() -> new NoSuchElementException("파일 없음"));
+        .orElseThrow(() -> new NoSuchElementException("해당 파일을 찾을 수 없습니다. id=" + id));
     return storage.load(file.getPath());
+  }
+
+  @Override
+  public FileMeta save(Path path) {
+
+    FileMeta file = new FileMeta(
+        path.getFileName().toString(),
+        path.toFile().length(),
+        "text/csv",
+        path.toString()
+    );
+
+    return repository.save(file);
   }
 }

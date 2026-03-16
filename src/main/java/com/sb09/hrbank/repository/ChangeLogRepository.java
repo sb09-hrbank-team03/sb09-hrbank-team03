@@ -2,19 +2,15 @@ package com.sb09.hrbank.repository;
 
 import com.sb09.hrbank.entity.ChangeLog;
 import java.time.Instant;
-import java.util.UUID;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-public interface ChangeLogRepository extends JpaRepository<ChangeLog, UUID> {
+public interface ChangeLogRepository extends JpaRepository<ChangeLog, Long> {
 
-  Long countChangeLogByDuration(
-      @Param("fromDate") Instant fromDate,
-      @Param("toDate") Instant toDate
-  );
+  Long countByCreatedAtBetween(Instant fromDate, Instant toDate);
 
   @Query("SELECT c From ChangeLog c "
       + "WHERE (:employeeNumber is NULL OR c.employeeNumber LIKE %:employeeNumber%) "

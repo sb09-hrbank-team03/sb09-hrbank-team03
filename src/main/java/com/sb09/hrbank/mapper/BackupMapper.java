@@ -9,7 +9,10 @@ import org.mapstruct.Mapping;
 public interface BackupMapper {
 
   @Mapping(source = "ipAddress", target = "worker")
+
   @Mapping(source = "backupStatus", target = "status")
+
   @Mapping(source = "file.id", target = "fileId")
-  BackupDto toDto(BackupHistory backupHistory);
+
+  BackupDto toDto(BackupHistory entity);
 }
