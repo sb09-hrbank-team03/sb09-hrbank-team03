@@ -5,6 +5,7 @@ import com.sb09.hrbank.dto.request.EmployeeUpdateRequest;
 import com.sb09.hrbank.dto.response.EmployeeDto;
 import com.sb09.hrbank.entity.Department;
 import com.sb09.hrbank.entity.Employee;
+import com.sb09.hrbank.mapper.EmployeeMapper;
 import com.sb09.hrbank.repository.DepartmentRepository;
 import com.sb09.hrbank.repository.EmployeeRepository;
 import com.sb09.hrbank.service.EmployeeService;
@@ -21,6 +22,7 @@ public class BasicEmployeeService implements EmployeeService {
 
   private final DepartmentRepository departmentRepository;
   private final EmployeeRepository employeeRepository;
+  private final EmployeeMapper employeeMapper;
 
   @Override
   @Transactional
@@ -34,14 +36,15 @@ public class BasicEmployeeService implements EmployeeService {
     Long profileImageId = getProfileImageId(profileImage);
 
     Employee savedEmployee = employeeRepository.save(createEmployee(request, department, profileImageId));
-    return findById(savedEmployee.getId());
+    return employeeMapper.toDto(savedEmployee);
   }
 
   @Override
   @Transactional(readOnly = true)
   public EmployeeDto findById(Long id) {
-    return employeeRepository.findEmployeeDtoById(id)
+    Employee employee = employeeRepository.findById(id)
         .orElseThrow(() -> new NoSuchElementException("해당 직원을 찾을 수 없습니다. id=" + id));
+    return employeeMapper.toDto(employee);
   }
 
   @Override
@@ -70,25 +73,8 @@ public class BasicEmployeeService implements EmployeeService {
       employee.updateProfileImage(profileImageId);
     }
 
-    return toDto(employee);
+    return employeeMapper.toDto(employee);
   }
-
-  private EmployeeDto toDto(Employee employee) {
-    Department department = employee.getDepartment();
-    return new EmployeeDto(
-        employee.getId(),
-        employee.getName(),
-        employee.getEmail(),
-        employee.getEmployeeNumber(),
-        department.getId(),
-        department.getName(),
-        employee.getPosition(),
-        employee.getHireDate(),
-        employee.getStatus(),
-        employee.getProfileImageId()
-    );
-  }
-
 
   private Employee createEmployee(EmployeeCreateRequest request, Department department, Long profileImageId) {
     return Employee.create(

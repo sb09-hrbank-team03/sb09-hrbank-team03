@@ -3,7 +3,7 @@ package com.sb09.hrbank.dto.request;
 import com.sb09.hrbank.entity.WorkStatus;
 import java.time.LocalDate;
 
-public record EmployeeUpdateRequest (
+public record EmployeeUpdateRequest(
     String name,
     String email,
     Long departmentId,
