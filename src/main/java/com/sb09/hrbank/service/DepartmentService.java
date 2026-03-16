@@ -18,4 +18,6 @@ public interface DepartmentService {
   void delete(Long id);
 
 
+  DepartmentResponse updateDepartment(Long id, DepartmentCreateRequest request);
+
 }
