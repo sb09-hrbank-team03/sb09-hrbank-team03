@@ -16,6 +16,10 @@ public interface ChangeLogService {
   Long getCount(Instant fromDate, Instant toDate);
   ChangeLogDetailDto getDetails(Long id);
   CursorPageResponse<ChangeLogDto> history(ChangeLogListRequest request);
-  ChangeLog create(ChangeType changeType, Employee employee, String ipAddress, EmployeeUpdateRequest request);
-  void addDetail(ChangeType changeType, List<ChangeLogDetail> changeLogDetail, ChangeLog changeLog, EmployeeUpdateRequest request);
+  ChangeLog createByCreate(Employee employee, String ipAddress, String memo);
+  ChangeLog createByUpdate(Employee employee, String ipAddress, EmployeeUpdateRequest request);
+  ChangeLog createByDelete(Employee employee, String ipAddress, String memo);
+  void addByCreate(List<ChangeLogDetail> detail,Employee employee);
+  void addByUpdate(List<ChangeLogDetail> detail,Employee employee,EmployeeUpdateRequest request);
+  void addByDelete(List<ChangeLogDetail> detail,Employee employee);
 }

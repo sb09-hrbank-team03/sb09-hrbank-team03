@@ -16,14 +16,12 @@ import com.sb09.hrbank.mapper.CursorPageResponseMapper;
 import com.sb09.hrbank.repository.ChangeLogDetailRepository;
 import com.sb09.hrbank.repository.ChangeLogRepository;
 import com.sb09.hrbank.repository.ChangeLogSpecification;
-import com.sb09.hrbank.repository.EmployeeRepository;
 import com.sb09.hrbank.service.ChangeLogService;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -105,31 +103,58 @@ public class BasicChangeLogService implements ChangeLogService {
         log -> log.getId()
     );
   }
-
+  // 추가 후에 실행
   @Override
-  public ChangeLog create(ChangeType changeType, Employee employee, String ipAddress, EmployeeUpdateRequest request) {
-    String memo = request.memo();
+  public ChangeLog createByCreate(Employee employee, String ipAddress, String memo) {
     String employeeNumber = employee.getEmployeeNumber();
-    ChangeLog changeLog = new ChangeLog(changeType, employee, ipAddress, memo, employeeNumber);
+    ChangeLog changeLog = new ChangeLog(ChangeType.CREATED, employee, ipAddress, memo, employeeNumber);
     ChangeLog saved = changeLogRepository.save(changeLog);
 
-    List<ChangeLogDetail> changeLogDetail = new ArrayList<>();
-    addDetail(changeType, changeLogDetail, changeLog, request);
-    changeLogDetailRepository.saveAll(changeLogDetail);
+    List<ChangeLogDetail> detail = new ArrayList<>();
+    addByCreate(detail,employee);
+    changeLogDetailRepository.saveAll(detail);
+    return saved;
+  }
+  // 업데이트 전에 실행
+  @Override
+  public ChangeLog createByUpdate(Employee employee, String ipAddress, EmployeeUpdateRequest request) {
+    String memo = request.memo();
+    String employeeNumber = employee.getEmployeeNumber();
+    ChangeLog changeLog = new ChangeLog(ChangeType.UPDATED, employee, ipAddress, memo, employeeNumber);
+    ChangeLog saved = changeLogRepository.save(changeLog);
+
+    List<ChangeLogDetail> detail = new ArrayList<>();
+    addByUpdate(detail, employee, request);
+    changeLogDetailRepository.saveAll(detail);
+    return saved;
+  }
+  // 삭제 전에 실행
+  @Override
+  public ChangeLog createByDelete(Employee employee, String ipAddress, String memo) {
+    String employeeNumber = employee.getEmployeeNumber();
+    ChangeLog changeLog = new ChangeLog(ChangeType.DELETED, employee, ipAddress, memo, employeeNumber);
+    ChangeLog saved = changeLogRepository.save(changeLog);
+
+    List<ChangeLogDetail> detail = new ArrayList<>();
+    addByDelete(detail, employee);
+    changeLogDetailRepository.saveAll(detail);
     return saved;
   }
 
   @Override
-  public void addDetail(ChangeType changeType, List<ChangeLogDetail> changeLogDetail, ChangeLog changeLog,
-      EmployeeUpdateRequest request) {
-    if(changeType.equals(ChangeType.CREATED)){
+  public void addByCreate(List<ChangeLogDetail> detail, Employee employee) {
 
-    }
-    else if(changeType.equals(ChangeType.DELETED)){
-
-    }
-    else{
-
-    }
   }
+
+  @Override
+  public void addByUpdate(List<ChangeLogDetail> detail, Employee employee,
+      EmployeeUpdateRequest request) {
+
+  }
+
+  @Override
+  public void addByDelete(List<ChangeLogDetail> detail, Employee employee) {
+
+  }
+
 }

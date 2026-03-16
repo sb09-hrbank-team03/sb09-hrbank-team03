@@ -30,19 +30,10 @@ public class ChangeLogDetail extends BaseEntity {
   @Column(columnDefinition = "TEXT")
   private String afterValue;
 
-  public void setChangeLog(ChangeLog changeLog) {
+  public ChangeLogDetail(ChangeLog changeLog, String property, String beforeValue, String afterValue){
     this.changeLog = changeLog;
-  }
-
-  public void setProperty(String property) {
     this.property = property;
-  }
-
-  public void setBeforeValue(String beforeValue) {
     this.beforeValue = beforeValue;
-  }
-
-  public void setAfterValue(String afterValue) {
     this.afterValue = afterValue;
   }
 }
