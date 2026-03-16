@@ -37,4 +37,12 @@ public class ChangeLog extends BaseEntity {
   @Column(columnDefinition = "TEXT", nullable = false)
   private String employeeNumber;
 
+  public ChangeLog(ChangeType type, Employee employee, String ipAddress, String memo, String employeeNumber){
+    this.type = type;
+    this.employee = employee;
+    this.ipAddress = ipAddress;
+    this.memo = memo;
+    this.employeeNumber = employeeNumber;
+  }
+
 }

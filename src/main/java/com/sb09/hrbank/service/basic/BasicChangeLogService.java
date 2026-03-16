@@ -9,17 +9,21 @@ import com.sb09.hrbank.dto.response.DiffDto;
 import com.sb09.hrbank.entity.ChangeLog;
 import com.sb09.hrbank.entity.ChangeLogDetail;
 import com.sb09.hrbank.entity.ChangeType;
+import com.sb09.hrbank.entity.Employee;
 import com.sb09.hrbank.mapper.ChangeLogDetailMapper;
 import com.sb09.hrbank.mapper.ChangeLogMapper;
 import com.sb09.hrbank.mapper.CursorPageResponseMapper;
 import com.sb09.hrbank.repository.ChangeLogDetailRepository;
 import com.sb09.hrbank.repository.ChangeLogRepository;
 import com.sb09.hrbank.repository.ChangeLogSpecification;
+import com.sb09.hrbank.repository.EmployeeRepository;
 import com.sb09.hrbank.service.ChangeLogService;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -103,7 +107,29 @@ public class BasicChangeLogService implements ChangeLogService {
   }
 
   @Override
-  public ChangeLog create(ChangeType changeType, Long id, EmployeeUpdateRequest request) {
-    return null;
+  public ChangeLog create(ChangeType changeType, Employee employee, String ipAddress, EmployeeUpdateRequest request) {
+    String memo = request.memo();
+    String employeeNumber = employee.getEmployeeNumber();
+    ChangeLog changeLog = new ChangeLog(changeType, employee, ipAddress, memo, employeeNumber);
+    ChangeLog saved = changeLogRepository.save(changeLog);
+
+    List<ChangeLogDetail> changeLogDetail = new ArrayList<>();
+    addDetail(changeType, changeLogDetail, changeLog, request);
+    changeLogDetailRepository.saveAll(changeLogDetail);
+    return saved;
+  }
+
+  @Override
+  public void addDetail(ChangeType changeType, List<ChangeLogDetail> changeLogDetail, ChangeLog changeLog,
+      EmployeeUpdateRequest request) {
+    if(changeType.equals(ChangeType.CREATED)){
+
+    }
+    else if(changeType.equals(ChangeType.DELETED)){
+
+    }
+    else{
+
+    }
   }
 }

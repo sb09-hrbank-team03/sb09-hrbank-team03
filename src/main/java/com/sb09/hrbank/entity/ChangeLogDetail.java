@@ -7,13 +7,14 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "employee_history_details")
 @Getter
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ChangeLogDetail extends BaseEntity {
 
   @ManyToOne(fetch = FetchType.LAZY)
@@ -28,4 +29,20 @@ public class ChangeLogDetail extends BaseEntity {
 
   @Column(columnDefinition = "TEXT")
   private String afterValue;
+
+  public void setChangeLog(ChangeLog changeLog) {
+    this.changeLog = changeLog;
+  }
+
+  public void setProperty(String property) {
+    this.property = property;
+  }
+
+  public void setBeforeValue(String beforeValue) {
+    this.beforeValue = beforeValue;
+  }
+
+  public void setAfterValue(String afterValue) {
+    this.afterValue = afterValue;
+  }
 }
