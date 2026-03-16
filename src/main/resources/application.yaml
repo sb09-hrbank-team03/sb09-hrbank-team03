@@ -1,6 +1,6 @@
 server:
   port: ${PORT:8080}
-hrbank:
+hr_bank:
   storage:
     type: local
     local:
@@ -11,9 +11,9 @@ hrbank:
         max-request-size: 10MB
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/hrbank
-    username: hrbank_user
-    password: hrbank1234
+    url: jdbc:postgresql://localhost:5432/hr_bank
+    username: hr_user
+    password: 1234
     driver-class-name: org.postgresql.Driver
 
   jpa:
@@ -23,9 +23,12 @@ spring:
     show-sql: false
     defer-datasource-initialization: true
   application:
-    name: hrbank
+    name: hr_bank
 
 logging:
   level:
     org.hibernate.SQL: debug
     org.hibernate.orm.jdbc.bind: trace
+
+backup:
+  schedule: 3600000
