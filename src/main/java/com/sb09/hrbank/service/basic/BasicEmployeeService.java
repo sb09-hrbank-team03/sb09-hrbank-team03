@@ -13,10 +13,12 @@ import com.sb09.hrbank.service.FileService;
 import java.time.LocalDate;
 import java.util.NoSuchElementException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class BasicEmployeeService implements EmployeeService {
@@ -96,7 +98,11 @@ public class BasicEmployeeService implements EmployeeService {
     employeeRepository.delete(employee);
 
     if (profileImageId != null) {
-      fileService.delete(profileImageId);
+      try {
+        fileService.delete(profileImageId);
+      } catch (NoSuchElementException e) {
+        log.warn("프로필 이미지가 이미 삭제되어 있습니다. employeeId={}, profileImageId={}", id, profileImageId);
+      }
     }
   }
 
