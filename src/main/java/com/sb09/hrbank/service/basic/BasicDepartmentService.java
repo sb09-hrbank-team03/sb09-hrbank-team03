@@ -30,6 +30,6 @@ public class BasicDepartmentService implements DepartmentService {
 
     Department savedDepartment = departmentRepository.save(newDepartment);
 
-    return departmentMapper.toDto(savedDepartment);
+    return departmentMapper.toDto(savedDepartment, 0);
   }
 }
