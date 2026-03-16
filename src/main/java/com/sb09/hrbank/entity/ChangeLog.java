@@ -13,6 +13,8 @@ import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 @Entity
 @Table(name="employee_histories")
@@ -26,6 +28,7 @@ public class ChangeLog extends BaseEntity {
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "employee_id")
+  @OnDelete(action = OnDeleteAction.SET_NULL)
   private Employee employee;
 
   @Column(columnDefinition = "TEXT", nullable = false)

@@ -72,9 +72,8 @@ public class BasicChangeLogService implements ChangeLogService {
   @Override
   public CursorPageResponse<ChangeLogDto> history(ChangeLogListRequest request) {
     Sort sort;
-    String sortField = request.getSortField() != null ? request.getSortField() : "at";
-    String sortDirection = request.getSortDirection() != null ? request.getSortDirection() : "desc";
-    Integer size = request.getSize() != null ? request.getSize() : 10;
+    String sortField = (request.sortField() != null && !request.sortField().isEmpty()) ? request.sortField() : "at";
+    String sortDirection = (request.sortDirection() != null && !request.sortDirection().isEmpty()) ? request.sortDirection() : "desc";    Integer size = request.size() != null ? request.size() : 10;
     if (sortField.equals("at")) {
       sort = Sort.by(Sort.Direction.fromString(sortDirection), "createdAt")
           .and(Sort.by(Sort.Direction.DESC, "id"));
@@ -85,8 +84,8 @@ public class BasicChangeLogService implements ChangeLogService {
     Pageable pageable = PageRequest.of(0, size, sort);
     Slice<ChangeLog> logSlice;
     ChangeType type = null;
-    if (request.getType() != null && !request.getType().isEmpty()) {
-      type = ChangeType.valueOf(request.getType());
+    if (request.type() != null && !request.type().isEmpty()) {
+      type = ChangeType.valueOf(request.type());
     }
     logSlice = changeLogRepository.findAll(
         ChangeLogSpecification.build(request),
@@ -135,7 +134,7 @@ public class BasicChangeLogService implements ChangeLogService {
   @Override
   public ChangeLog createByDelete(Employee employee, String ipAddress) {
     String employeeNumber = employee.getEmployeeNumber();
-    ChangeLog changeLog = new ChangeLog(ChangeType.DELETED, employee, ipAddress, null, employeeNumber);
+    ChangeLog changeLog = new ChangeLog(ChangeType.DELETED, null, ipAddress, null, employeeNumber);
     ChangeLog saved = changeLogRepository.save(changeLog);
 
     List<ChangeLogDetail> details = new ArrayList<>();
@@ -158,16 +157,16 @@ public class BasicChangeLogService implements ChangeLogService {
   @Override
   public void addByUpdate(List<ChangeLogDetail> details, Employee employee,
       EmployeeUpdateRequest request, ChangeLog changeLog) {
-    if(request.hireDate()!=null) addDetail(details, changeLog, "입사일", employee.getHireDate().toString(), request.hireDate().toString());
-    if(request.name()!=null) addDetail(details, changeLog, "이름", employee.getName(), request.name());
-    if(request.position()!=null) addDetail(details, changeLog, "직함", employee.getPosition(), request.position());
+    if(request.hireDate()!=null && !employee.getHireDate().equals(request.hireDate())) addDetail(details, changeLog, "입사일", employee.getHireDate().toString(), request.hireDate().toString());
+    if(request.name()!=null && !employee.getName().equals(request.name())) addDetail(details, changeLog, "이름", employee.getName(), request.name());
+    if(request.position()!=null && !employee.getPosition().equals(request.position())) addDetail(details, changeLog, "직함", employee.getPosition(), request.position());
     if(request.departmentId()!=null){
       Department department = departmentRepository.findById(request.departmentId()).orElseThrow(() -> new NoSuchElementException("id에 해당하는 부서가 존재하지 않습니다."));
       String departmentName = department.getName();
-      addDetail(details, changeLog, "부서", employee.getDepartment().getName(), departmentName);
+      if(!departmentName.equals(employee.getDepartment().getName())) addDetail(details, changeLog, "부서", employee.getDepartment().getName(), departmentName);
     }
-    if(request.email()!=null) addDetail(details, changeLog, "이메일", employee.getEmail(), request.email());
-    if(request.status()!=null) addDetail(details, changeLog, "상태", employee.getStatus().toString(), request.status().toString());
+    if(request.email()!=null && !employee.getEmail().equals(request.email())) addDetail(details, changeLog, "이메일", employee.getEmail(), request.email());
+    if(request.status()!=null && !employee.getStatus().equals(request.status())) addDetail(details, changeLog, "상태", employee.getStatus().toString(), request.status().toString());
   }
 
   @Override

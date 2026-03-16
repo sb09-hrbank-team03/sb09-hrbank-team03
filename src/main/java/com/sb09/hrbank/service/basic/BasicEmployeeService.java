@@ -101,7 +101,7 @@ public class BasicEmployeeService implements EmployeeService {
     Employee employee = employeeRepository.findById(id)
         .orElseThrow(() -> new NoSuchElementException("해당 직원을 찾을 수 없습니다. id=" + id));
 
-    changeLogService.createByDelete(employee,clientIp, )
+    changeLogService.createByDelete(employee,clientIp);
 
     Long profileImageId = employee.getProfileImageId();
     employeeRepository.delete(employee);

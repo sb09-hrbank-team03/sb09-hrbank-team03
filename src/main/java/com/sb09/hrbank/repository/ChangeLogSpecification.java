@@ -21,13 +21,13 @@ public class ChangeLogSpecification {
   // 이렇게 해서 return 되는 spec이 바로 저희가 설정한 조건들이 전부 잘 적용이 되어 조건 덩어리입니다.
   // 얘도 pageable처럼 간단하게 repository에 던져주면 됩니다.
   public static Specification<ChangeLog> build(ChangeLogListRequest request) {
-    Specification<ChangeLog> spec = likeIfPresent("employeeNumber", request.getEmployeeNumber());
-    spec = spec.and(likeIfPresent("memo", request.getMemo()));
-    spec = spec.and(likeIfPresent("ipAddress", request.getIpAddress()));
-    spec = spec.and(typeEquals(request.getType()));
-    spec = spec.and(greaterThanOrEqual(request.getAtFrom()));
-    spec = spec.and(lessThanOrEqual(request.getAtTo()));
-    spec = spec.and(idAfter(request.getIdAfter()));
+    Specification<ChangeLog> spec = likeIfPresent("employeeNumber", request.employeeNumber());
+    spec = spec.and(likeIfPresent("memo", request.memo()));
+    spec = spec.and(likeIfPresent("ipAddress", request.ipAddress()));
+    spec = spec.and(typeEquals(request.type()));
+    spec = spec.and(greaterThanOrEqual(request.atFrom()));
+    spec = spec.and(lessThanOrEqual(request.atTo()));
+    spec = spec.and(idAfter(request.idAfter()));
     return spec;
   }
   // field는 그냥 필드명입니다. 그리고 value는 그 필드에 들어가 있는 값.

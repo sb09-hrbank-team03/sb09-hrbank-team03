@@ -109,21 +109,7 @@ ALTER TABLE backups
             REFERENCES binary_contents (id)
             ON DELETE SET NULL;
 
-<<<<<<< HEAD
-CREATE TABLE binary_contents
-(
-    id bigint PRIMARY KEY,
-    created_at timestamptz NOT NULL,
-    file_name varchar(255) NOT NULL,
-    size bigint NOT NULL,
-    content_type varchar(100) NOT NULL,
-    path varchar(255) NOT NULL
-);
-
--- Backup 제약조건
-=======
 -- 7. 제약조건
->>>>>>> origin/feature/backup-history
 CREATE UNIQUE INDEX unique_backup_in_progress
     ON backups (backup_status)
     WHERE backup_status = 'IN_PROGRESS';

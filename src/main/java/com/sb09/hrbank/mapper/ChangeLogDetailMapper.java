@@ -17,11 +17,11 @@ public interface ChangeLogDetailMapper {
   @Mapping(source = "changeLog.ipAddress", target = "ipAddress")
   @Mapping(source = "changeLog.createdAt", target = "at")
   @Mapping(source = "changeLog.employee.name", target = "employeeName")
-  @Mapping(source = "changeLog.employee.profileImage.id", target = "profileImageId")
+  @Mapping(source = "changeLog.employee.profileImageId", target = "profileImageId")
   @Mapping(source = "diffs", target = "diffs")
   ChangeLogDetailDto toDetailDto(ChangeLog changeLog, List<DiffDto> diffs);
 
-  @Mapping(source = "property",    target = "property")
+  @Mapping(source = "property",    target = "propertyName")
   @Mapping(source = "beforeValue", target = "before")
   @Mapping(source = "afterValue",  target = "after")
   DiffDto toDiffDto(ChangeLogDetail detail);
