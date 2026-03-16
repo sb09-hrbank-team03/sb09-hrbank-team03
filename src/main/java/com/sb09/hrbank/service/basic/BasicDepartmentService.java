@@ -1,6 +1,6 @@
 package com.sb09.hrbank.service.basic;
 
-
+import org.springframework.transaction.annotation.Transactional;
 import com.sb09.hrbank.dto.common.DepartmentResponse;
 import com.sb09.hrbank.dto.request.DepartmentCreateRequest;
 import com.sb09.hrbank.entity.Department;
@@ -31,5 +31,23 @@ public class BasicDepartmentService implements DepartmentService {
     Department savedDepartment = departmentRepository.save(newDepartment);
 
     return departmentMapper.toDto(savedDepartment, 0);
+  }
+
+  @Override
+  @Transactional
+  public DepartmentResponse updateDepartment(Long id, DepartmentCreateRequest request) {
+
+    Department department = departmentRepository.findById(id)
+        .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 부서입니다."));
+
+    if (!department.getName().equals(request.name())) {
+      boolean isDuplicate = departmentRepository.existsByName(request.name());
+      if (isDuplicate) {
+        throw new IllegalArgumentException("이미 존재하는 부서 이름입니다.");
+      }
+    }
+
+    department.update(request.name(), request.description(), request.establishedDate());
+    return departmentMapper.toDto(department, 0);
   }
 }
