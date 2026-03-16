@@ -50,4 +50,13 @@ public class BasicDepartmentService implements DepartmentService {
     department.update(request.name(), request.description(), request.establishedDate());
     return departmentMapper.toDto(department, 0);
   }
+
+  @Override
+  @Transactional
+  public void deleteDepartment(Long id) {
+    if (!departmentRepository.existsById(id)) {
+      throw new IllegalArgumentException("존재하지 않는 부서입니다.");
+    }
+    departmentRepository.deleteById(id);
+  }
 }
