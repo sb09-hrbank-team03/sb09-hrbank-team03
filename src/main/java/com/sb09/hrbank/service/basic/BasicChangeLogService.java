@@ -33,13 +33,13 @@ public class BasicChangeLogService implements ChangeLogService {
   @Transactional(readOnly = true)
   @Override
   public Long getCount(Instant fromDate, Instant toDate) {
-    if(fromDate == null){
-      // 기본 일주일 전
-      fromDate = toDate.minus(7, ChronoUnit.DAYS);
-    }
-    if(toDate == null){
+    if (toDate == null) {
       // 기본 오늘
       toDate = Instant.now();
+    }
+    if (fromDate == null) {
+      // 기본 일주일 전
+      fromDate = toDate.minus(7, ChronoUnit.DAYS);
     }
     return changeLogRepository.countChangeLogByDuration(fromDate, toDate);
   }
@@ -53,8 +53,8 @@ public class BasicChangeLogService implements ChangeLogService {
   @Transactional(readOnly = true)
   @Override
   public CursorPageResponse<ChangeLogDto> history(ChangeLogListRequest request) {
-
-    Sort sort = Sort.by(Sort.Direction.fromString(request.getSortDirection()), request.getSortField())
+    String jpaField = request.getSortField().equals("at") ? "createdAt" : request.getSortField();
+    Sort sort = Sort.by(Sort.Direction.fromString(request.getSortDirection()), jpaField)
         .and(Sort.by(Sort.Direction.DESC, "id"));
     Pageable pageable = PageRequest.of(0, request.getSize(), sort);
     Slice<ChangeLog> logSlice = changeLogRepository.findAllByCondition(
@@ -72,12 +72,12 @@ public class BasicChangeLogService implements ChangeLogService {
         logSlice,
         log -> changeLogMapper.toDto(log),
         log -> {
-          if(request.getSortField().equals("ipAddress")){
+          if (request.getSortField().equals("ipAddress")) {
             return log.getIpAddress();
           }
           return log.getCreatedAt();
         },
-          log -> log.getId()
+        log -> log.getId()
     );
   }
 

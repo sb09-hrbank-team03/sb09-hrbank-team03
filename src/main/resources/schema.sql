@@ -39,7 +39,7 @@ CREATE TABLE departments
 
 CREATE TABLE employee_histories
 (
-    id bigint PRIMARY_KEY,
+    id bigint PRIMARY KEY,
     created_at timestamptz NOT NULL,
     change_type varchar(50) NOT NULL,
     ip_address varchar(50) NOT NULL,

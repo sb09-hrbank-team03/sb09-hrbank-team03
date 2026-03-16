@@ -9,7 +9,6 @@ import com.sb09.hrbank.mapper.EmployeeMapper;
 import com.sb09.hrbank.repository.DepartmentRepository;
 import com.sb09.hrbank.repository.EmployeeRepository;
 import com.sb09.hrbank.service.EmployeeService;
-import java.time.LocalDate;
 import java.util.NoSuchElementException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -23,6 +22,7 @@ public class BasicEmployeeService implements EmployeeService {
   private final DepartmentRepository departmentRepository;
   private final EmployeeRepository employeeRepository;
   private final EmployeeMapper employeeMapper;
+  private final EmployeeNumberGenerator employeeNumberGenerator;
 
   @Override
   @Transactional
@@ -87,7 +87,7 @@ public class BasicEmployeeService implements EmployeeService {
         request.hireDate(),
         request.name(),
         request.email(),
-        generateEmployeeNumber(request.hireDate()),
+        employeeNumberGenerator.generate(request.hireDate()),
         request.position(),
         department,
         profileImageId
@@ -99,22 +99,5 @@ public class BasicEmployeeService implements EmployeeService {
       return null;
     }
     return null;
-  }
-
-  private int extractSequence(String employeeNumber) {
-    String[] parts = employeeNumber.split("-");
-    return Integer.parseInt(parts[2]);
-  }
-
-  private String generateEmployeeNumber(LocalDate hireDate) {
-    String year = String.valueOf(hireDate.getYear());
-    String prefix = "EMP-" + year + "-";
-
-    int nextSequence = employeeRepository
-        .findTopByEmployeeNumberStartingWithOrderByEmployeeNumberDesc(prefix)
-        .map(employee -> extractSequence(employee.getEmployeeNumber()) + 1)
-        .orElse(1);
-
-    return prefix + String.format("%03d", nextSequence);
   }
 }
