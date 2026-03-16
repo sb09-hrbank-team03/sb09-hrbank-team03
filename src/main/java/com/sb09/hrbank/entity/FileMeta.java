@@ -25,4 +25,11 @@ public class FileMeta extends BaseUpdatableEntity {
 
   @Column(nullable = false)
   private String path;
+
+  public FileMeta(String name, long size, String contentType, String path) {
+    this.fileName = name;
+    this.size = size;
+    this.contentType = contentType;
+    this.path = path;
+  }
 }
