@@ -5,8 +5,11 @@ import com.sb09.hrbank.dto.request.ChangeLogListRequest;
 import com.sb09.hrbank.dto.request.EmployeeUpdateRequest;
 import com.sb09.hrbank.dto.response.ChangeLogDetailDto;
 import com.sb09.hrbank.dto.response.ChangeLogDto;
+import com.sb09.hrbank.dto.response.DiffDto;
 import com.sb09.hrbank.entity.ChangeLog;
+import com.sb09.hrbank.entity.ChangeLogDetail;
 import com.sb09.hrbank.entity.ChangeType;
+import com.sb09.hrbank.mapper.ChangeLogDetailMapper;
 import com.sb09.hrbank.mapper.ChangeLogMapper;
 import com.sb09.hrbank.mapper.CursorPageResponseMapper;
 import com.sb09.hrbank.repository.ChangeLogDetailRepository;
@@ -15,6 +18,8 @@ import com.sb09.hrbank.repository.ChangeLogSpecification;
 import com.sb09.hrbank.service.ChangeLogService;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
+import java.util.NoSuchElementException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -32,6 +37,7 @@ public class BasicChangeLogService implements ChangeLogService {
   private final ChangeLogDetailRepository changeLogDetailRepository;
   private final CursorPageResponseMapper cursorPageResponseMapper;
   private final ChangeLogMapper changeLogMapper;
+  private final ChangeLogDetailMapper changeLogDetailMapper;
 
   @Transactional(readOnly = true)
   @Override
@@ -50,8 +56,11 @@ public class BasicChangeLogService implements ChangeLogService {
   @Transactional(readOnly = true)
   @Override
   public ChangeLogDetailDto getDetails(Long id) {
+    ChangeLog changeLog = changeLogRepository.findById(id).orElseThrow(() -> new NoSuchElementException("해당 id의 수정 이력이 존재하지 않습니다."));
+    List<ChangeLogDetail> diffs = changeLogDetailRepository.findByChangeLogId(id);
 
-    return null;
+    List<DiffDto> diffDtos = changeLogDetailMapper.toDiffDtoList(diffs);
+    return changeLogDetailMapper.toDetailDto(changeLog,diffDtos);
   }
 
   @Transactional(readOnly = true)
