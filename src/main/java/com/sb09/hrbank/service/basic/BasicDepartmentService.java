@@ -1,5 +1,6 @@
 package com.sb09.hrbank.service.basic;
 
+import com.sb09.hrbank.dto.request.DepartmentUpdateRequest;
 import org.springframework.transaction.annotation.Transactional;
 import com.sb09.hrbank.dto.common.DepartmentResponse;
 import com.sb09.hrbank.dto.request.DepartmentCreateRequest;
@@ -35,7 +36,7 @@ public class BasicDepartmentService implements DepartmentService {
 
   @Override
   @Transactional
-  public DepartmentResponse updateDepartment(Long id, DepartmentCreateRequest request) {
+  public DepartmentResponse updateDepartment(Long id, DepartmentUpdateRequest request) {
 
     Department department = departmentRepository.findById(id)
         .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 부서입니다."));
