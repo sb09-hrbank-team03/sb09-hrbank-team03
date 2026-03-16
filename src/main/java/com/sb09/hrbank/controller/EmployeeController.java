@@ -81,10 +81,4 @@ public class EmployeeController {
     }
     employeeService.delete(id, clientIp);
   }
-
-  @DeleteMapping("/{id}")
-  @ResponseStatus(HttpStatus.NO_CONTENT)
-  public void delete(@PathVariable Long id) {
-    employeeService.delete(id);
-  }
 }
