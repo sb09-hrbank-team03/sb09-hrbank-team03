@@ -11,4 +11,7 @@ public class FileStorage {
     return new FileSystemResource(path);
   }
 
+  public void delete(String path) {
+    new FileSystemResource(path).getFile().delete();
+  }
 }
