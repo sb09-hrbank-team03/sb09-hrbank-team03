@@ -31,7 +31,7 @@ public class BasicDepartmentService implements DepartmentService {
 
     Department savedDepartment = departmentRepository.save(newDepartment);
 
-    return departmentMapper.toDto(savedDepartment, 0);
+    return departmentMapper.toDto(savedDepartment, null);
   }
 
   @Override
@@ -49,7 +49,7 @@ public class BasicDepartmentService implements DepartmentService {
     }
 
     department.update(request.name(), request.description(), request.establishedDate());
-    return departmentMapper.toDto(department, 0);
+    return departmentMapper.toDto(department, null);
   }
 
   @Override
