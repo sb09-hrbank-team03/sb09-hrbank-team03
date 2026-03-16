@@ -133,9 +133,9 @@ public class BasicChangeLogService implements ChangeLogService {
   }
   // 삭제 전에 실행
   @Override
-  public ChangeLog createByDelete(Employee employee, String ipAddress, String memo) {
+  public ChangeLog createByDelete(Employee employee, String ipAddress) {
     String employeeNumber = employee.getEmployeeNumber();
-    ChangeLog changeLog = new ChangeLog(ChangeType.DELETED, employee, ipAddress, memo, employeeNumber);
+    ChangeLog changeLog = new ChangeLog(ChangeType.DELETED, employee, ipAddress, null, employeeNumber);
     ChangeLog saved = changeLogRepository.save(changeLog);
 
     List<ChangeLogDetail> details = new ArrayList<>();
@@ -146,13 +146,13 @@ public class BasicChangeLogService implements ChangeLogService {
 
   @Override
   public void addByCreate(List<ChangeLogDetail> details, Employee employee, ChangeLog changeLog) {
-    addDetail(details, changeLog, "입사일", "-", employee.getHireDate().toString());
-    addDetail(details, changeLog, "이름", "-", employee.getName());
-    addDetail(details, changeLog, "직함", "-", employee.getPosition());
-    addDetail(details, changeLog, "부서", "-", employee.getDepartment().getName());
-    addDetail(details, changeLog, "이메일", "-", employee.getEmail());
-    addDetail(details, changeLog, "사번", "-", employee.getEmployeeNumber());
-    addDetail(details, changeLog, "상태", "-", employee.getStatus().toString());
+    addDetail(details, changeLog, "입사일", null, employee.getHireDate().toString());
+    addDetail(details, changeLog, "이름", null, employee.getName());
+    addDetail(details, changeLog, "직함", null, employee.getPosition());
+    addDetail(details, changeLog, "부서", null, employee.getDepartment().getName());
+    addDetail(details, changeLog, "이메일", null, employee.getEmail());
+    addDetail(details, changeLog, "사번", null, employee.getEmployeeNumber());
+    addDetail(details, changeLog, "상태", null, employee.getStatus().toString());
   }
 
   @Override
@@ -172,13 +172,13 @@ public class BasicChangeLogService implements ChangeLogService {
 
   @Override
   public void addByDelete(List<ChangeLogDetail> details, Employee employee, ChangeLog changeLog) {
-    addDetail(details, changeLog, "입사일",  employee.getHireDate().toString(), "-");
-    addDetail(details, changeLog, "이름",  employee.getName(), "-");
-    addDetail(details, changeLog, "직함",  employee.getPosition(), "-");
-    addDetail(details, changeLog, "부서",  employee.getDepartment().getName(), "-");
-    addDetail(details, changeLog, "이메일",  employee.getEmail(), "-");
-    addDetail(details, changeLog, "사번",  employee.getEmployeeNumber(), "-");
-    addDetail(details, changeLog, "상태",  employee.getStatus().toString(), "-");
+    addDetail(details, changeLog, "입사일",  employee.getHireDate().toString(), null);
+    addDetail(details, changeLog, "이름",  employee.getName(), null);
+    addDetail(details, changeLog, "직함",  employee.getPosition(), null);
+    addDetail(details, changeLog, "부서",  employee.getDepartment().getName(), null);
+    addDetail(details, changeLog, "이메일",  employee.getEmail(), null);
+    addDetail(details, changeLog, "사번",  employee.getEmployeeNumber(), null);
+    addDetail(details, changeLog, "상태",  employee.getStatus().toString(), null);
 
   }
 

@@ -7,11 +7,11 @@ import org.springframework.web.multipart.MultipartFile;
 
 public interface EmployeeService {
 
-  EmployeeDto create(EmployeeCreateRequest request, MultipartFile profileImage);
+  EmployeeDto create(EmployeeCreateRequest request, MultipartFile profileImage, String clientIp);
 
-  EmployeeDto update(Long id, EmployeeUpdateRequest request, MultipartFile profileImage);
+  EmployeeDto update(Long id, EmployeeUpdateRequest request, MultipartFile profileImage, String clientIp);
 
   EmployeeDto findById(Long id);
 
-  void delete(Long id);
+  void delete(Long id, String clientIp);
 }

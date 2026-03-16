@@ -8,6 +8,7 @@ import com.sb09.hrbank.entity.Employee;
 import com.sb09.hrbank.mapper.EmployeeMapper;
 import com.sb09.hrbank.repository.DepartmentRepository;
 import com.sb09.hrbank.repository.EmployeeRepository;
+import com.sb09.hrbank.service.ChangeLogService;
 import com.sb09.hrbank.service.EmployeeService;
 import com.sb09.hrbank.service.FileService;
 import java.time.LocalDate;
@@ -27,10 +28,11 @@ public class BasicEmployeeService implements EmployeeService {
   private final EmployeeRepository employeeRepository;
   private final EmployeeMapper employeeMapper;
   private final FileService fileService;
+  private final ChangeLogService changeLogService;
 
   @Override
   @Transactional
-  public EmployeeDto create(EmployeeCreateRequest request, MultipartFile profileImage) {
+  public EmployeeDto create(EmployeeCreateRequest request, MultipartFile profileImage, String clientIp) {
     if (employeeRepository.existsByEmail(request.email())) {
       throw new IllegalArgumentException("이미 사용 중인 이메일입니다.");
     }
@@ -44,6 +46,9 @@ public class BasicEmployeeService implements EmployeeService {
     }
 
     Employee savedEmployee = employeeRepository.save(createEmployee(request, department, profileImageId));
+
+    changeLogService.createByCreate(savedEmployee, clientIp, request.memo());
+
     return employeeMapper.toDto(savedEmployee);
   }
 
@@ -57,7 +62,7 @@ public class BasicEmployeeService implements EmployeeService {
 
   @Override
   @Transactional
-  public EmployeeDto update(Long id, EmployeeUpdateRequest request, MultipartFile profileImage) {
+  public EmployeeDto update(Long id, EmployeeUpdateRequest request, MultipartFile profileImage, String clientIp) {
     Employee employee = employeeRepository.findById(id)
         .orElseThrow(() -> new NoSuchElementException("해당 직원을 찾을 수 없습니다. id=" + id));
 
@@ -72,6 +77,8 @@ public class BasicEmployeeService implements EmployeeService {
     if (profileImage != null && !profileImage.isEmpty() && profileImageId == null) {
       throw new UnsupportedOperationException("프로필 이미지 업로드 기능이 아직 구현되지 않았습니다.");
     }
+
+    changeLogService.createByUpdate(employee,clientIp,request);
 
     employee.update(
         request.hireDate(),
@@ -90,9 +97,11 @@ public class BasicEmployeeService implements EmployeeService {
 
   @Override
   @Transactional
-  public void delete(Long id) {
+  public void delete(Long id, String clientIp) {
     Employee employee = employeeRepository.findById(id)
         .orElseThrow(() -> new NoSuchElementException("해당 직원을 찾을 수 없습니다. id=" + id));
+
+    changeLogService.createByDelete(employee,clientIp, )
 
     Long profileImageId = employee.getProfileImageId();
     employeeRepository.delete(employee);
