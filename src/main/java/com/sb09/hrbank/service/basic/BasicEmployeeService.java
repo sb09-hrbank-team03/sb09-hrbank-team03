@@ -195,6 +195,7 @@ public class BasicEmployeeService implements EmployeeService {
   }
 
   @Override
+  @Transactional(readOnly = true)
   public List<EmployeeDistributionDto> distribution(String groupBy, String status) {
     List<EmployeeDistributionDto> dtos = new ArrayList<>();
     WorkStatus workStatus = WorkStatus.valueOf(status);
@@ -216,6 +217,7 @@ public class BasicEmployeeService implements EmployeeService {
   }
 
   @Override
+  @Transactional(readOnly = true)
   public Long count(String status, LocalDate fromDate, LocalDate to) {
     Long count;
     LocalDate now = LocalDate.now();
