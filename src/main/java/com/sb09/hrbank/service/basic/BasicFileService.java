@@ -4,6 +4,7 @@ import com.sb09.hrbank.entity.FileMeta;
 import com.sb09.hrbank.repository.FileMetaRepository;
 import com.sb09.hrbank.service.FileService;
 import com.sb09.hrbank.storage.FileStorage;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.NoSuchElementException;
 import lombok.RequiredArgsConstructor;
@@ -27,13 +28,20 @@ public class BasicFileService implements FileService {
   @Override
   public FileMeta save(Path path) {
 
-    FileMeta file = new FileMeta(
-        path.getFileName().toString(),
-        path.toFile().length(),
-        "text/csv",
-        path.toString()
-    );
+    try {
+      String contentType = Files.probeContentType(path);
 
-    return repository.save(file);
+      FileMeta file = new FileMeta(
+          path.getFileName().toString(),
+          Files.size(path),
+          contentType,
+          path.toString()
+      );
+
+      return repository.save(file);
+
+    } catch (Exception e) {
+      throw new RuntimeException("파일 메타 저장 실패", e);
+    }
   }
 }

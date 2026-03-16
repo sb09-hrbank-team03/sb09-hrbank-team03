@@ -32,8 +32,6 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class BasicBackupService implements BackupService {
 
-  private static final int BATCH_SIZE = 100;
-
   private final BackupRepository backupRepository;
   private final BackupMapper backupMapper;
   private final CursorPageResponseMapper cursorMapper;
@@ -85,6 +83,10 @@ public class BasicBackupService implements BackupService {
     return backupMapper.toDto(history);
   }
 
+  /**
+   * STEP1
+   * 최근 완료된 백업 이후 직원 데이터 변경 여부 확인
+   */
   private boolean isBackupRequired() {
 
     return backupRepository
@@ -107,6 +109,9 @@ public class BasicBackupService implements BackupService {
     );
   }
 
+  /**
+   * STEP3 실제 백업 수행 (Cursor 기반 조회)
+   */
   private FileMeta executeBackup() throws IOException {
 
     Path path = csvBackupWriter.createCsv();
@@ -148,6 +153,9 @@ public class BasicBackupService implements BackupService {
     return fileService.save(path);
   }
 
+  /**
+   * CSV 깨짐 방지
+   */
   private String escape(String value) {
 
     if (value == null) {
@@ -157,6 +165,9 @@ public class BasicBackupService implements BackupService {
     return "\"" + value.replace("\"", "\"\"") + "\"";
   }
 
+  /**
+   * STEP4 실패 시 에러 로그 저장
+   */
   private FileMeta createErrorLog(Exception e) throws IOException {
 
     Path path = Path.of("backup/error-" + System.currentTimeMillis() + ".log");
