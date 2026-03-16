@@ -1,6 +1,6 @@
 server:
   port: ${PORT:8080}
-hrbank:
+hr_bank:
   storage:
     type: local
     local:
@@ -29,3 +29,6 @@ logging:
   level:
     org.hibernate.SQL: debug
     org.hibernate.orm.jdbc.bind: trace
+
+backup:
+  schedule: 3600000
