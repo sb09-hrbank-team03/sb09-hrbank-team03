@@ -74,7 +74,8 @@ public class DepartmentRepositoryImpl implements DepartmentRepositoryCustom {
           yield compareWithTieBreaker(department.establishedDate, cursorDate,
               request.getLastElementId(), sortDirection);
         } catch (DateTimeParseException e) {
-          throw new IllegalArgumentException("설립일 커서 형식이 올바르지 않습니다.", e);
+          throw new IllegalArgumentException("설립일 커서 형식이 올바르지 않습니다. cursor=" +
+              request.getCursor(), e);
         }
       }
     };
