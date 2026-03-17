@@ -1,6 +1,9 @@
 package com.sb09.hrbank.service.basic;
 
+import com.sb09.hrbank.dto.common.CursorPageResponse;
 import com.sb09.hrbank.dto.request.EmployeeCreateRequest;
+import com.sb09.hrbank.dto.request.EmployeeSearchRequest;
+import com.sb09.hrbank.dto.request.EmployeeSortField;
 import com.sb09.hrbank.dto.request.EmployeeUpdateRequest;
 import com.sb09.hrbank.dto.response.EmployeeDistributionDto;
 import com.sb09.hrbank.dto.response.EmployeeDto;
@@ -8,6 +11,7 @@ import com.sb09.hrbank.dto.response.EmployeeTrendDto;
 import com.sb09.hrbank.entity.Department;
 import com.sb09.hrbank.entity.Employee;
 import com.sb09.hrbank.entity.WorkStatus;
+import com.sb09.hrbank.mapper.CursorPageResponseMapper;
 import com.sb09.hrbank.mapper.EmployeeMapper;
 import com.sb09.hrbank.repository.DepartmentRepository;
 import com.sb09.hrbank.repository.EmployeeRepository;
@@ -18,8 +22,10 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -33,8 +39,8 @@ public class BasicEmployeeService implements EmployeeService {
   private final EmployeeRepository employeeRepository;
   private final EmployeeMapper employeeMapper;
   private final FileService fileService;
-
   private final ChangeLogService changeLogService;
+  private final CursorPageResponseMapper cursorPageResponseMapper;
 
   @Override
   @Transactional
@@ -47,10 +53,6 @@ public class BasicEmployeeService implements EmployeeService {
     Department department = departmentRepository.findById(request.departmentId()).orElseThrow(
         () -> new NoSuchElementException("해당 부서를 찾을 수 없습니다. id=" + request.departmentId()));
     Long profileImageId = getProfileImageId(profileImage);
-    if (profileImage != null && !profileImage.isEmpty() && profileImageId == null) {
-      throw new UnsupportedOperationException("프로필 이미지 업로드 기능이 아직 구현되지 않았습니다.");
-    }
-
     Employee savedEmployee = employeeRepository.save(
         createEmployee(request, department, profileImageId));
 
@@ -73,7 +75,7 @@ public class BasicEmployeeService implements EmployeeService {
       String clientIp) {
     Employee employee = employeeRepository.findById(id)
         .orElseThrow(() -> new NoSuchElementException("해당 직원을 찾을 수 없습니다. id=" + id));
-
+    Long previousProfileImageId = employee.getProfileImageId();
     if (employeeRepository.existsByEmailAndIdNot(request.email(), id)) {
       throw new IllegalArgumentException("이미 사용 중인 이메일입니다.");
     }
@@ -81,9 +83,6 @@ public class BasicEmployeeService implements EmployeeService {
     Department department = departmentRepository.findById(request.departmentId()).orElseThrow(
         () -> new NoSuchElementException("해당 부서를 찾을 수 없습니다. id=" + request.departmentId()));
     Long profileImageId = getProfileImageId(profileImage);
-    if (profileImage != null && !profileImage.isEmpty() && profileImageId == null) {
-      throw new UnsupportedOperationException("프로필 이미지 업로드 기능이 아직 구현되지 않았습니다.");
-    }
 
     changeLogService.createByUpdate(employee, clientIp, request);
 
@@ -91,6 +90,9 @@ public class BasicEmployeeService implements EmployeeService {
         request.status(), department);
     if (profileImageId != null) {
       employee.updateProfileImage(profileImageId);
+      if (!Objects.equals(previousProfileImageId, profileImageId)) {
+        deleteProfileImageSafely(id, previousProfileImageId);
+      }
     }
 
     return employeeMapper.toDto(employee);
@@ -106,14 +108,44 @@ public class BasicEmployeeService implements EmployeeService {
 
     Long profileImageId = employee.getProfileImageId();
     employeeRepository.delete(employee);
+    deleteProfileImageSafely(id, profileImageId);
+  }
 
-    if (profileImageId != null) {
-      try {
-        fileService.delete(profileImageId);
-      } catch (NoSuchElementException e) {
-        log.warn("프로필 이미지가 이미 삭제되어 있습니다. employeeId={}, profileImageId={}", id, profileImageId);
-      }
+  private void deleteProfileImageSafely(Long employeeId, Long profileImageId) {
+    if (profileImageId == null) {
+      return;
     }
+    try {
+      fileService.delete(profileImageId);
+    } catch (NoSuchElementException e) {
+      log.warn("프로필 이미지가 이미 삭제됐습니다. employeeId={}, profileImageId={}", employeeId, profileImageId);
+    } catch (RuntimeException e) {
+      log.error("프로필 이미지 삭제 중 오류가 발생했습니다. employeeId={}, profileImageId={}", employeeId, profileImageId, e);
+    }
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public CursorPageResponse<EmployeeDto> findAll(EmployeeSearchRequest request) {
+    Slice<EmployeeDto> slice = employeeRepository.searchEmployees(request);
+    return cursorPageResponseMapper.fromSlice(
+        slice,
+        dto -> dto,
+        dto -> getCursorValue(dto, request),
+        EmployeeDto::id
+    );
+  }
+
+  private Object getCursorValue(EmployeeDto dto, EmployeeSearchRequest request) {
+    EmployeeSortField sortBy = request.getSortBy();
+    if (sortBy == null) {
+      sortBy = EmployeeSortField.hireDate;
+    }
+    return switch (sortBy) {
+      case name -> dto.name();
+      case employeeNumber -> dto.employeeNumber();
+      case hireDate -> dto.hireDate() != null ? dto.hireDate().toString() : null;
+    };
   }
 
   private Employee createEmployee(EmployeeCreateRequest request, Department department,
@@ -126,7 +158,7 @@ public class BasicEmployeeService implements EmployeeService {
     if (profileImage == null || profileImage.isEmpty()) {
       return null;
     }
-    return null;
+    return fileService.saveProfileImage(profileImage).getId();
   }
 
   private int extractSequence(String employeeNumber) {

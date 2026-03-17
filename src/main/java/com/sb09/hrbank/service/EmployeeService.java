@@ -1,6 +1,8 @@
 package com.sb09.hrbank.service;
 
+import com.sb09.hrbank.dto.common.CursorPageResponse;
 import com.sb09.hrbank.dto.request.EmployeeCreateRequest;
+import com.sb09.hrbank.dto.request.EmployeeSearchRequest;
 import com.sb09.hrbank.dto.request.EmployeeUpdateRequest;
 import com.sb09.hrbank.dto.response.EmployeeDistributionDto;
 import com.sb09.hrbank.dto.response.EmployeeDto;
@@ -16,6 +18,8 @@ public interface EmployeeService {
   EmployeeDto update(Long id, EmployeeUpdateRequest request, MultipartFile profileImage, String clientIp);
 
   EmployeeDto findById(Long id);
+
+  CursorPageResponse<EmployeeDto> findAll(EmployeeSearchRequest request);
 
   void delete(Long id, String clientIp);
 
