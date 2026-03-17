@@ -18,4 +18,8 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long>, Emplo
 
   List<Employee> findByIdGreaterThanOrderByIdAsc(Long id, Pageable pageable);
 
+  boolean existsByDepartmentId(Long departmentId);
+
+  long countByDepartmentId(Long departmentId);
+
 }
