@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.web.multipart.MultipartFile;
@@ -31,14 +32,31 @@ public class BasicFileService implements FileService {
   }
 
   @Override
+  @Transactional
   public void delete(Long id) {
     FileMeta file = findFile(id);
-    try {
-      storage.delete(file.getPath());
-    } catch (RuntimeException e) {
-      log.warn("파일 삭제 중 오류가 발생했습니다. 메타데이터는 계속 삭제합니다. id={}, path={}", id, file.getPath(), e);
-    } finally {
-      repository.deleteById(id);
+
+    repository.delete(file);
+
+    if (TransactionSynchronizationManager.isSynchronizationActive()) {
+      TransactionSynchronizationManager.registerSynchronization(
+          new TransactionSynchronization() {
+            @Override
+            public void afterCommit() {
+              try {
+                storage.delete(file.getPath());
+              } catch (RuntimeException e) {
+                log.warn("트랜잭션 커밋 후 파일 삭제에 실패했습니다. path={}", file.getPath(), e);
+              }
+            }
+          }
+      );
+    } else {
+      try {
+        storage.delete(file.getPath());
+      } catch (RuntimeException e) {
+        log.warn("파일 삭제에 실패했습니다. path={}", file.getPath(), e);
+      }
     }
   }
 

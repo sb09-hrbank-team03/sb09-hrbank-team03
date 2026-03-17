@@ -20,8 +20,8 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -38,12 +38,11 @@ public class EmployeeController {
   private final EmployeeService employeeService;
 
   @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-  @ResponseStatus(HttpStatus.CREATED)
   public EmployeeDto create(
       @RequestHeader(value = "X-Forwarded-For", required = false) String ip,
       HttpServletRequest servletRequest,
-      @RequestPart("request") EmployeeCreateRequest request,
-      @RequestPart(value = "profileImage", required = false) MultipartFile profileImage
+      @RequestPart("employee") EmployeeCreateRequest request,
+      @RequestPart(value = "profile", required = false) MultipartFile profileImage
   ) {
     String clientIp;
     if (ip != null && !ip.isBlank()) {
@@ -67,13 +66,13 @@ public class EmployeeController {
     return employeeService.findById(id);
   }
 
-  @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+  @PatchMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public EmployeeDto update(
       @RequestHeader(value = "X-Forwarded-For", required = false) String ip,
       HttpServletRequest servletRequest,
       @PathVariable Long id,
-      @RequestPart("request") EmployeeUpdateRequest request,
-      @RequestPart(value = "profileImage", required = false) MultipartFile profileImage
+      @RequestPart("employee") EmployeeUpdateRequest request,
+      @RequestPart(value = "profile", required = false) MultipartFile profileImage
   ) {
     String clientIp;
     if (ip != null && !ip.isBlank()) {

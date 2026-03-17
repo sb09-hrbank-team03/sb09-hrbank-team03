@@ -29,18 +29,18 @@ public class EmployeeSearchRequest {
   @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
   private LocalDate hireDateTo;
 
-  private WorkStatus workStatus;
+  private WorkStatus status;
 
   private String cursor;
 
-  private Long lastElementId;
+  private Long idAfter;
 
   @Min(1)
   @Max(100)
   private int size = 10;
 
-  private EmployeeSortField sortBy = EmployeeSortField.hireDate;
+  private EmployeeSortField sortField = EmployeeSortField.name;
 
-  private Sort.Direction sortDirection = Sort.Direction.DESC;
+  private Sort.Direction sortDirection = Sort.Direction.ASC;
 
 }
