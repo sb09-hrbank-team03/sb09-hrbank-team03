@@ -19,7 +19,7 @@ spring:
   jpa:
     open-in-view: false
     hibernate:
-      ddl-auto: create # create / validate
+      ddl-auto: validate # create / validate
     show-sql: false
     defer-datasource-initialization: true
   application:
