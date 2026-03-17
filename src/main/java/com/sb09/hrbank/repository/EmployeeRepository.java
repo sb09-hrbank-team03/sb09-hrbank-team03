@@ -4,6 +4,7 @@ import com.sb09.hrbank.entity.Employee;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface EmployeeRepository extends JpaRepository<Employee, Long>, EmployeeRepositoryCustom {
@@ -15,7 +16,7 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long>, Emplo
 
   boolean existsByUpdatedAtAfter(Instant time);
 
-  List<Employee> findTop100ByIdGreaterThanOrderByIdAsc(Long id);
+  List<Employee> findByIdGreaterThanOrderByIdAsc(Long id, Pageable pageable);
 
   boolean existsByDepartmentId(Long departmentId);
 

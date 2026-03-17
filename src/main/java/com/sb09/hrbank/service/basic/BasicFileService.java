@@ -47,6 +47,10 @@ public class BasicFileService implements FileService {
     return repository.save(toFileMeta(path, path.toFile().length(), "text/csv"));
   }
 
+  public FileMeta saveLog(Path path) {
+    return repository.save(toFileMeta(path, path.toFile().length(), "text/plain"));
+  }
+
   @Override
   public FileMeta saveProfileImage(MultipartFile profileImage) {
     if (profileImage == null || profileImage.isEmpty()) {
