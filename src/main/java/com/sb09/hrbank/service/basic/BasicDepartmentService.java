@@ -17,6 +17,15 @@ import com.sb09.hrbank.dto.request.DepartmentSearchRequest;
 import com.sb09.hrbank.dto.request.DepartmentSortField;
 import com.sb09.hrbank.mapper.CursorPageResponseMapper;
 import org.springframework.data.domain.Slice;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -26,6 +35,9 @@ public class BasicDepartmentService implements DepartmentService {
   private final DepartmentRepository departmentRepository;
   private final DepartmentMapper departmentMapper;
   private final CursorPageResponseMapper cursorPageResponseMapper;
+
+  @PersistenceContext
+  private EntityManager entityManager;
 
   @Override
   @Transactional
@@ -57,7 +69,7 @@ public class BasicDepartmentService implements DepartmentService {
 
     department.update(request.name(), request.description(), request.establishedDate());
 
-    int employeeCount = (int) employeeRepository.countByDepartmentId(department.getId());
+    int employeeCount = Math.toIntExact(employeeRepository.countByDepartmentId(department.getId()));
     return departmentMapper.toDto(department, employeeCount);
   }
 
@@ -67,10 +79,17 @@ public class BasicDepartmentService implements DepartmentService {
 
     Slice<Department> departmentSlice = departmentRepository.searchDepartments(request);
 
+    List<Department> departments = departmentSlice.getContent();
+    Set<Long> departmentIds = departments.stream()
+        .map(Department::getId)
+        .collect(Collectors.toSet());
+    Map<Long, Integer> employeeCountMap = getEmployeeCountsByDepartmentIds(departmentIds);
+
     return cursorPageResponseMapper.fromSlice(
         departmentSlice,
         department -> {
-          int employeeCount = (int) employeeRepository.countByDepartmentId(department.getId());
+          int employeeCount = Math.toIntExact(
+              employeeRepository.countByDepartmentId(department.getId()));
           return departmentMapper.toDto(department, employeeCount);
         },
         department -> {
@@ -83,13 +102,33 @@ public class BasicDepartmentService implements DepartmentService {
     );
   }
 
+  private Map<Long, Integer> getEmployeeCountsByDepartmentIds(Collection<Long> departmentIds) {
+    if (departmentIds == null || departmentIds.isEmpty()) {
+      return Collections.emptyMap();
+    }
+    List<Object[]> results = entityManager.createQuery(
+            "SELECT e.department.id, COUNT(e) FROM Employee e " +
+                "WHERE e.department.id IN :departmentIds " +
+                "GROUP BY e.department.id",
+            Object[].class)
+        .setParameter("departmentIds", departmentIds)
+        .getResultList();
+    Map<Long, Integer> employeeCountMap = new HashMap<>();
+    for (Object[] row : results) {
+      Long departmentId = (Long) row[0];
+      Long count = (Long) row[1];
+      employeeCountMap.put(departmentId, count != null ? count.intValue() : 0);
+    }
+    return employeeCountMap;
+  }
+
   @Override
   @Transactional(readOnly = true)
   public DepartmentDto findById(Long id) {
     Department department = departmentRepository.findById(id)
         .orElseThrow(() -> new NoSuchElementException("존재하지 않는 부서입니다."));
 
-    int employeeCount = (int) employeeRepository.countByDepartmentId(department.getId());
+    int employeeCount = Math.toIntExact(employeeRepository.countByDepartmentId(department.getId()));
     return departmentMapper.toDto(department, employeeCount);
   }
 

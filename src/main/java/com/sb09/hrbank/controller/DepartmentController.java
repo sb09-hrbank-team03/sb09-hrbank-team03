@@ -51,7 +51,7 @@ public class DepartmentController {
 
   @GetMapping
   public CursorPageResponse<DepartmentDto> searchDepartments(
-      @ModelAttribute DepartmentSearchRequest request
+      @Valid @ModelAttribute DepartmentSearchRequest request
   ) {
     return departmentService.searchDepartments(request);
   }
