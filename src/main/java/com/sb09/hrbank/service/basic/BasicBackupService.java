@@ -177,8 +177,17 @@ public class BasicBackupService implements BackupService {
 
     Path path = Path.of(csvPath, "error-" + System.currentTimeMillis() + ".log");
     Files.createDirectories(path.getParent());
-    Files.writeString(path, e.getMessage());
 
-    return fileService.save(path);
+    StringBuilder logContent = new StringBuilder();
+
+    logContent.append("Exception: ").append(String.valueOf(e)).append("\n");
+
+    for (StackTraceElement element : e.getStackTrace()) {
+      logContent.append("\tat ").append(element).append("\n");
+    }
+
+    Files.writeString(path, logContent.toString());
+
+    return fileService.saveLog(path);
   }
 }
