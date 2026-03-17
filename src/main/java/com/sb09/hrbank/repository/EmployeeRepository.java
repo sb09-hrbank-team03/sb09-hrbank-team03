@@ -11,7 +11,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-public interface EmployeeRepository extends JpaRepository<Employee, Long>, EmployeeRepositoryCustom {
+public interface EmployeeRepository extends JpaRepository<Employee, Long>,
+    EmployeeRepositoryCustom {
+
   boolean existsByEmail(String email);
 
   boolean existsByEmailAndIdNot(String email, Long id);
@@ -34,15 +36,10 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long>, Emplo
   List<Object[]> countGroupByPosition(@Param("status") WorkStatus status);
 
   Long countByHireDateBetween(LocalDate from, LocalDate to);
-  
+
   Long countByHireDateBetweenAndStatus(LocalDate from, LocalDate to, WorkStatus status);
 
   boolean existsByDepartmentId(Long departmentId);
 
   long countByDepartmentId(Long departmentId);
-
-  boolean existsByDepartmentId(Long departmentId);
-
-  long countByDepartmentId(Long departmentId);
-
 }
