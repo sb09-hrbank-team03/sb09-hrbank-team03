@@ -18,7 +18,7 @@ public class ChangeLogListRequest{
   private Instant atFrom;
   private Instant atTo;
   private Long idAfter;
-  private Long cursor;
+  private Instant cursor;
 
   private int size = 10;
   private ChangeLogSortField sortField = ChangeLogSortField.at;

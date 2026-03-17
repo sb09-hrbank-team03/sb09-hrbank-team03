@@ -105,7 +105,11 @@ public class ChangeLogRepositoryImpl implements ChangeLogRepositoryCustom {
       return null;
     }
 
-    return changeLog.id.lt(request.getCursor());
+    return changeLog.createdAt.lt(request.getCursor())
+        .or(
+            changeLog.createdAt.eq(request.getCursor())
+                .and(changeLog.id.lt(request.getIdAfter()))
+        );
   }
 
   private OrderSpecifier<?> getOrder(ChangeLogListRequest request) {
