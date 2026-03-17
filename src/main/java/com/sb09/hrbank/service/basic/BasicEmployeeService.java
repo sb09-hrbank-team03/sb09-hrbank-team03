@@ -149,38 +149,36 @@ public class BasicEmployeeService implements EmployeeService {
   public List<EmployeeTrendDto> trend(LocalDate from, LocalDate to, String unit) {
     LocalDate now = LocalDate.now();
     LocalDate toDate = to != null ? to : now;
-    LocalDate fromDate = from != null ? from : switch (unit) {
-      case "day" -> now.minusDays(12);
-      case "week" -> now.minusWeeks(12);
-      case "month" -> now.minusMonths(12);
-      case "quarter" -> now.minusMonths(36);
-      case "year" -> now.minusYears(12);
-      default -> now.minusMonths(12);
-    };
+    LocalDate fromDate = from != null ? from : convert(now, unit, -12);
     List<EmployeeTrendDto> result = new ArrayList<>();
     LocalDate flag = fromDate;
-    Long prevCount = null;
+    Long prevCount = employeeRepository.countByHireDateLessThanEqual(convert(fromDate, unit, -1));
     while (!flag.isAfter(toDate)) {
-      LocalDate nextFlag = switch (unit) {
-        case "day" -> flag.plusDays(1);
-        case "week" -> flag.plusWeeks(1);
-        case "month" -> flag.plusMonths(1);
-        case "quarter" -> flag.plusMonths(3);
-        case "year" -> flag.plusYears(1);
-        default -> flag.plusMonths(1);
-      };
+      LocalDate nextFlag = convert(flag, unit, 1);
       Long count = employeeRepository.countByHireDateLessThanEqual(flag);
-      Long change = prevCount != null ? count - prevCount : 0;
-      double changeRate =
-          prevCount != null && prevCount > 0 ? Math.round((double) change / prevCount * 1000.0)
-              / 10.0 : 0.0;
-      EmployeeTrendDto dto = new EmployeeTrendDto(flag, count, change, changeRate);
+      Long change = count - prevCount;
+      double changeRate = prevCount > 0 ? (double) change / prevCount * 100 : 0.0;
+      String changeRateToString = String.format("%.1f", changeRate);
+      EmployeeTrendDto dto = new EmployeeTrendDto(flag, count, change, changeRateToString);
       result.add(dto);
       prevCount = count;
       flag = nextFlag;
     }
     return result;
   }
+
+  @Override
+  public LocalDate convert(LocalDate date, String unit, int amount) {
+    return switch (unit) {
+      case "day"     -> date.plusDays(amount);
+      case "week"    -> date.plusWeeks(amount);
+      case "month"   -> date.plusMonths(amount);
+      case "quarter" -> date.plusMonths(amount*3);
+      case "year"    -> date.plusYears(amount);
+      default        -> date.plusMonths(amount);
+    };
+  }
+
 
   @Override
   @Transactional(readOnly = true)
