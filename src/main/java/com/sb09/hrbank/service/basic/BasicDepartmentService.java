@@ -51,7 +51,7 @@ public class BasicDepartmentService implements DepartmentService {
 
     department.update(request.name(), request.description(), request.establishedDate());
 
-    int employeeCount = employeeRepository.countByDepartmentId(department.getId());
+    int employeeCount = (int) employeeRepository.countByDepartmentId(department.getId());
     return departmentMapper.toDto(department, employeeCount);
   }
 
@@ -64,6 +64,6 @@ public class BasicDepartmentService implements DepartmentService {
     if (employeeRepository.existsByDepartmentId(id)) {
       throw new IllegalArgumentException("소속 직원이 있는 부서는 삭제할 수 없습니다.");
     }
-    departmentRepository.deleteById(id);
+    departmentRepository.delete(department);
   }
 }
