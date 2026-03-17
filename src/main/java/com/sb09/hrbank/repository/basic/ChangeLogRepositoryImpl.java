@@ -65,7 +65,7 @@ public class ChangeLogRepositoryImpl implements ChangeLogRepositoryCustom {
   }
 
   private BooleanExpression typeEq(ChangeType type){
-    if(type == null){
+    if(type == null || type == ChangeType.ALL){
       return null;
     }
     return changeLog.type.eq(type);
