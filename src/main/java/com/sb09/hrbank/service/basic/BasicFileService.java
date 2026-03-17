@@ -42,7 +42,11 @@ public class BasicFileService implements FileService {
         new TransactionSynchronization() {
           @Override
           public void afterCommit() {
-            storage.delete(file.getPath());
+            try {
+              storage.delete(file.getPath());
+            } catch (RuntimeException e) {
+              log.warn("트랜잭션 커밋 후 파일 삭제에 실패했습니다. path={}", file.getPath(), e);
+            }
           }
         }
     );
