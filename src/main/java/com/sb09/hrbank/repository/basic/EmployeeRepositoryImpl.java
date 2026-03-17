@@ -118,14 +118,14 @@ public class EmployeeRepositoryImpl implements EmployeeRepositoryCustom {
   }
 
   private BooleanExpression statusEq(EmployeeSearchRequest request) {
-    if (request.getWorkStatus() == null) {
+    if (request.getStatus() == null) {
       return null;
     }
-    return employee.status.eq(request.getWorkStatus());
+    return employee.status.eq(request.getStatus());
   }
 
   private BooleanExpression cursorCondition(EmployeeSearchRequest request) {
-    if (request.getCursor() == null || request.getLastElementId() == null) {
+    if (request.getCursor() == null || request.getIdAfter() == null) {
       return null;
     }
 
@@ -133,15 +133,15 @@ public class EmployeeRepositoryImpl implements EmployeeRepositoryCustom {
     EmployeeSortField sortField = getSortField(request);
 
     return switch (sortField) {
-      case name -> compareWithTieBreaker(employee.name, request.getCursor(), request.getLastElementId(),
+      case name -> compareWithTieBreaker(employee.name, request.getCursor(), request.getIdAfter(),
           sortDirection);
       case employeeNumber -> compareWithTieBreaker(employee.employeeNumber, request.getCursor(),
-          request.getLastElementId(), sortDirection);
+          request.getIdAfter(), sortDirection);
       case hireDate -> {
         try {
           LocalDate cursorDate = LocalDate.parse(request.getCursor());
           yield compareWithTieBreaker(employee.hireDate, cursorDate,
-              request.getLastElementId(), sortDirection);
+              request.getIdAfter(), sortDirection);
         } catch (DateTimeParseException e) {
           throw new IllegalArgumentException("입사일 커서 형식이 올바르지 않습니다. cursor=" + request.getCursor(), e);
         }
@@ -178,7 +178,7 @@ public class EmployeeRepositoryImpl implements EmployeeRepositoryCustom {
   }
 
   private EmployeeSortField getSortField(EmployeeSearchRequest request) {
-    return request.getSortBy() == null ? EmployeeSortField.hireDate : request.getSortBy();
+    return request.getSortField() == null ? EmployeeSortField.name : request.getSortField();
   }
 
   private Sort.Direction getSortDirection(EmployeeSearchRequest request) {
