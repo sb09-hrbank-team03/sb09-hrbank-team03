@@ -5,7 +5,8 @@ import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 
 public record DepartmentUpdateRequest(
-    @NotBlank(message = "부서 이름은 필수입니다.")
+    
+    @NotNull(message = "부서 이름은 필수입니다.")
     String name,
 
     String description,
