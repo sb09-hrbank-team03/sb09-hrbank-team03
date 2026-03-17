@@ -12,6 +12,5 @@ public interface BackupRepository
 
   boolean existsByBackupStatus(BackupStatus backupStatus);
 
-  @EntityGraph(attributePaths = {"department"})
   Optional<BackupHistory> findFirstByBackupStatusOrderByStartedAtDesc(BackupStatus status);
 }
