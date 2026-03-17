@@ -38,14 +38,26 @@ public class BasicFileService implements FileService {
 
     repository.delete(file);
 
-    TransactionSynchronizationManager.registerSynchronization(
-        new TransactionSynchronization() {
-          @Override
-          public void afterCommit() {
-            storage.delete(file.getPath());
+    if (TransactionSynchronizationManager.isSynchronizationActive()) {
+      TransactionSynchronizationManager.registerSynchronization(
+          new TransactionSynchronization() {
+            @Override
+            public void afterCommit() {
+              try {
+                storage.delete(file.getPath());
+              } catch (RuntimeException e) {
+                log.warn("트랜잭션 커밋 후 파일 삭제에 실패했습니다. path={}", file.getPath(), e);
+              }
+            }
           }
-        }
-    );
+      );
+    } else {
+      try {
+        storage.delete(file.getPath());
+      } catch (RuntimeException e) {
+        log.warn("파일 삭제에 실패했습니다. path={}", file.getPath(), e);
+      }
+    }
   }
 
   @Override
