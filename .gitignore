@@ -44,3 +44,4 @@ Thumb.db
 
 ### Log files ###
 *.log
+backup/
