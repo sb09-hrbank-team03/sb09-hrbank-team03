@@ -61,7 +61,7 @@ public class ChangeLogRepositoryImpl implements ChangeLogRepositoryCustom {
     if(number == null || number.isBlank()){
       return null;
     }
-    return changeLog.employee.employeeNumber.contains(number);
+    return changeLog.employeeNumber.contains(number);
   }
 
   private BooleanExpression typeEq(ChangeType type){
