@@ -9,6 +9,7 @@ import org.mapstruct.Mapper;
 public interface DepartmentMapper {
 
   Department toEntity(DepartmentCreateRequest request);
-  DepartmentDto toDto(Department entity, int employeeCount);
-  
+
+  DepartmentDto toDto(Department entity, Long employeeCount);
+
 }
