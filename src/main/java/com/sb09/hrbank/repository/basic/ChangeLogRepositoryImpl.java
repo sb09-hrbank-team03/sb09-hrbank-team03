@@ -9,7 +9,6 @@ import com.sb09.hrbank.entity.ChangeType;
 import com.sb09.hrbank.entity.QChangeLog;
 import com.sb09.hrbank.repository.ChangeLogRepositoryCustom;
 import java.time.Instant;
-import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;

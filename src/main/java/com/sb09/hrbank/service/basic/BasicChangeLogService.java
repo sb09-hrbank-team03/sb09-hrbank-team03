@@ -6,7 +6,6 @@ import com.sb09.hrbank.dto.request.EmployeeUpdateRequest;
 import com.sb09.hrbank.dto.response.ChangeLogDetailDto;
 import com.sb09.hrbank.dto.response.ChangeLogDto;
 import com.sb09.hrbank.dto.response.DiffDto;
-import com.sb09.hrbank.entity.BackupHistory;
 import com.sb09.hrbank.entity.ChangeLog;
 import com.sb09.hrbank.entity.ChangeLogDetail;
 import com.sb09.hrbank.entity.ChangeType;
@@ -25,10 +24,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -76,7 +71,7 @@ public class BasicChangeLogService implements ChangeLogService {
     return cursorPageResponseMapper.fromSlice(
         slice,
         changeLogMapper::toDto,
-        ChangeLog::getId,
+        ChangeLog::getCreatedAt,
         ChangeLog::getId
     );
   }
