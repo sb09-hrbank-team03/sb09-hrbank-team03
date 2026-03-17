@@ -1,6 +1,7 @@
 package com.sb09.hrbank.service.basic;
 
 import com.sb09.hrbank.dto.request.DepartmentUpdateRequest;
+import com.sb09.hrbank.repository.EmployeeRepository;
 import java.util.NoSuchElementException;
 import org.springframework.transaction.annotation.Transactional;
 import com.sb09.hrbank.dto.response.DepartmentDto;
@@ -16,23 +17,24 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class BasicDepartmentService implements DepartmentService {
 
+  private final EmployeeRepository employeeRepository;
   private final DepartmentRepository departmentRepository;
   private final DepartmentMapper departmentMapper;
 
   @Override
+  @Transactional
   public DepartmentDto create(DepartmentCreateRequest request) {
 
     boolean isDuplicate = departmentRepository.existsByName(request.name());
 
     if (isDuplicate) {
-      throw new NoSuchElementException("이미 존재하는 부서 이름입니다.");
+      throw new IllegalArgumentException("이미 존재하는 부서 이름입니다.");
     }
 
     Department newDepartment = departmentMapper.toEntity(request);
-
     Department savedDepartment = departmentRepository.save(newDepartment);
 
-    return departmentMapper.toDto(savedDepartment, null);
+    return departmentMapper.toDto(savedDepartment, 0);
   }
 
   @Override
@@ -40,24 +42,27 @@ public class BasicDepartmentService implements DepartmentService {
   public DepartmentDto update(Long id, DepartmentUpdateRequest request) {
 
     Department department = departmentRepository.findById(id)
-        .orElseThrow(() -> new NoSuchElementException("존재하지 않는 부서입니다."));
+        .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 부서입니다."));
 
-    if (!department.getName().equals(request.name())) {
-      boolean isDuplicate = departmentRepository.existsByName(request.name());
-      if (isDuplicate) {
-        throw new NoSuchElementException("이미 존재하는 부서 이름입니다.");
-      }
+    boolean isDuplicate = departmentRepository.existsByNameAndIdNot(request.name(), id);
+    if (isDuplicate) {
+      throw new IllegalArgumentException("이미 존재하는 부서 이름입니다.");
     }
 
     department.update(request.name(), request.description(), request.establishedDate());
-    return departmentMapper.toDto(department, null);
+
+    int employeeCount = employeeRepository.countByDepartmentId(department.getId());
+    return departmentMapper.toDto(department, employeeCount);
   }
 
   @Override
   @Transactional
   public void delete(Long id) {
-    if (!departmentRepository.existsById(id)) {
-      throw new IllegalArgumentException("존재하지 않는 부서입니다.");
+    Department department = departmentRepository.findById(id)
+        .orElseThrow(() -> new NoSuchElementException("존재하지 않는 부서입니다."));
+
+    if (employeeRepository.existsByDepartmentId(id)) {
+      throw new IllegalArgumentException("소속 직원이 있는 부서는 삭제할 수 없습니다.");
     }
     departmentRepository.deleteById(id);
   }
