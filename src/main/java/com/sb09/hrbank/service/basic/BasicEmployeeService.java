@@ -137,11 +137,11 @@ public class BasicEmployeeService implements EmployeeService {
   }
 
   private Object getCursorValue(EmployeeDto dto, EmployeeSearchRequest request) {
-    EmployeeSortField sortBy = request.getSortBy();
-    if (sortBy == null) {
-      sortBy = EmployeeSortField.hireDate;
+    EmployeeSortField sortField = request.getSortField();
+    if (sortField == null) {
+      sortField = EmployeeSortField.name;
     }
-    return switch (sortBy) {
+    return switch (sortField) {
       case name -> dto.name();
       case employeeNumber -> dto.employeeNumber();
       case hireDate -> dto.hireDate() != null ? dto.hireDate().toString() : null;
@@ -214,7 +214,7 @@ public class BasicEmployeeService implements EmployeeService {
   @Override
   @Transactional(readOnly = true)
   public List<EmployeeDistributionDto> distribution(String groupBy, String status) {
-    List<EmployeeDistributionDto> dtos = new ArrayList<>();
+    List<EmployeeDistributionDto> dos = new ArrayList<>();
     WorkStatus workStatus = WorkStatus.valueOf(status);
     List<Object[]> countWithGroup =
         groupBy.equals("position") ? employeeRepository.countGroupByPosition(workStatus)
@@ -225,9 +225,9 @@ public class BasicEmployeeService implements EmployeeService {
       String percentString = String.format("%.1f", percentage);
       EmployeeDistributionDto dto = new EmployeeDistributionDto((String) o[0],
           ((Number) o[1]).longValue(), percentString);
-      dtos.add(dto);
+      dos.add(dto);
     }
-    return dtos;
+    return dos;
   }
 
   @Override
