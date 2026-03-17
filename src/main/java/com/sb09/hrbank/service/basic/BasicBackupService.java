@@ -21,6 +21,7 @@ import java.nio.file.Path;
 import java.time.Instant;
 import java.util.List;
 
+import java.util.NoSuchElementException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -31,8 +32,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 public class BasicBackupService implements BackupService {
-
-  private static final int BATCH_SIZE = 100;
 
   private final BackupRepository backupRepository;
   private final BackupMapper backupMapper;
@@ -106,6 +105,19 @@ public class BasicBackupService implements BackupService {
         BackupHistory::getId
     );
   }
+
+  @Override
+  @Transactional(readOnly = true)
+  public BackupDto getLatestBackup(BackupStatus status) {
+
+    BackupHistory history = backupRepository
+        .findFirstByBackupStatusOrderByStartedAtDesc(status)
+        .orElseThrow(() ->
+            new NoSuchElementException("해당 상태의 백업 이력이 없습니다. status=" + status));
+
+    return backupMapper.toDto(history);
+  }
+
 
   private FileMeta executeBackup() throws IOException {
 

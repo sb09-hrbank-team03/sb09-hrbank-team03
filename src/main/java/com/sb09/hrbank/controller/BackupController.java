@@ -3,6 +3,7 @@ package com.sb09.hrbank.controller;
 import com.sb09.hrbank.dto.common.CursorPageResponse;
 import com.sb09.hrbank.dto.request.BackupListRequest;
 import com.sb09.hrbank.dto.response.BackupDto;
+import com.sb09.hrbank.entity.BackupStatus;
 import com.sb09.hrbank.service.BackupService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -37,4 +38,13 @@ public class BackupController {
   ) {
     return backupService.getBackups(request);
   }
+
+  @GetMapping("/latest")
+  public BackupDto getLatestBackup(
+      @RequestParam(required = false, defaultValue = "COMPLETED") BackupStatus status
+  ) {
+    return backupService.getLatestBackup(status);
+  }
+
+
 }
