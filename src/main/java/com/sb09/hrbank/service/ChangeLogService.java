@@ -6,11 +6,8 @@ import com.sb09.hrbank.dto.request.EmployeeUpdateRequest;
 import com.sb09.hrbank.dto.response.ChangeLogDetailDto;
 import com.sb09.hrbank.dto.response.ChangeLogDto;
 import com.sb09.hrbank.entity.ChangeLog;
-import com.sb09.hrbank.entity.ChangeLogDetail;
-import com.sb09.hrbank.entity.ChangeType;
 import com.sb09.hrbank.entity.Employee;
 import java.time.Instant;
-import java.util.List;
 
 public interface ChangeLogService {
   Long getCount(Instant fromDate, Instant toDate);

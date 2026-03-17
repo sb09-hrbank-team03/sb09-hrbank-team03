@@ -1,6 +1,5 @@
 package com.sb09.hrbank.repository;
 
-import com.sb09.hrbank.dto.response.EmployeeDto;
 import com.sb09.hrbank.entity.Employee;
 import com.sb09.hrbank.entity.WorkStatus;
 import java.time.Instant;
