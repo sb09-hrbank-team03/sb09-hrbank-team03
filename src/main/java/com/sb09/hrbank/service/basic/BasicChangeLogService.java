@@ -61,19 +61,23 @@ public class BasicChangeLogService implements ChangeLogService {
   @Transactional(readOnly = true)
   @Override
   public ChangeLogDetailDto getDetails(Long id) {
-    ChangeLog changeLog = changeLogRepository.findById(id).orElseThrow(() -> new NoSuchElementException("해당 id의 수정 이력이 존재하지 않습니다."));
+    ChangeLog changeLog = changeLogRepository.findById(id)
+        .orElseThrow(() -> new NoSuchElementException("해당 id의 수정 이력이 존재하지 않습니다."));
     List<ChangeLogDetail> diffs = changeLogDetailRepository.findByChangeLogId(id);
 
     List<DiffDto> diffDtos = changeLogDetailMapper.toDiffDtoList(diffs);
-    return changeLogDetailMapper.toDetailDto(changeLog,diffDtos);
+    return changeLogDetailMapper.toDetailDto(changeLog, diffDtos);
   }
 
   @Transactional(readOnly = true)
   @Override
   public CursorPageResponse<ChangeLogDto> history(ChangeLogListRequest request) {
     Sort sort;
-    String sortField = (request.sortField() != null && !request.sortField().isEmpty()) ? request.sortField() : "at";
-    String sortDirection = (request.sortDirection() != null && !request.sortDirection().isEmpty()) ? request.sortDirection() : "desc";    Integer size = request.size() != null ? request.size() : 10;
+    String sortField = (request.sortField() != null
+        && !request.sortField().isEmpty()) ? request.sortField() : "at";
+    String sortDirection = (request.sortDirection() != null
+        && !request.sortDirection().isEmpty()) ? request.sortDirection() : "desc";
+    Integer size = request.size() != null ? request.size() : 10;
     if (sortField.equals("at")) {
       sort = Sort.by(Sort.Direction.fromString(sortDirection), "createdAt")
           .and(Sort.by(Sort.Direction.DESC, "id"));
@@ -101,24 +105,29 @@ public class BasicChangeLogService implements ChangeLogService {
         log -> log.getId()
     );
   }
+
   // 추가 후에 실행
   @Override
   public ChangeLog createByCreate(Employee employee, String ipAddress, String memo) {
     String employeeNumber = employee.getEmployeeNumber();
-    ChangeLog changeLog = new ChangeLog(ChangeType.CREATED, employee, ipAddress, memo, employeeNumber);
+    ChangeLog changeLog = new ChangeLog(ChangeType.CREATED, employee, ipAddress, memo,
+        employeeNumber);
     ChangeLog saved = changeLogRepository.save(changeLog);
 
     List<ChangeLogDetail> details = new ArrayList<>();
-    addByCreate(details,employee, changeLog);
+    addByCreate(details, employee, changeLog);
     changeLogDetailRepository.saveAll(details);
     return saved;
   }
+
   // 업데이트 전에 실행
   @Override
-  public ChangeLog createByUpdate(Employee employee, String ipAddress, EmployeeUpdateRequest request) {
+  public ChangeLog createByUpdate(Employee employee, String ipAddress,
+      EmployeeUpdateRequest request) {
     String memo = request.memo();
     String employeeNumber = employee.getEmployeeNumber();
-    ChangeLog changeLog = new ChangeLog(ChangeType.UPDATED, employee, ipAddress, memo, employeeNumber);
+    ChangeLog changeLog = new ChangeLog(ChangeType.UPDATED, employee, ipAddress, memo,
+        employeeNumber);
     ChangeLog saved = changeLogRepository.save(changeLog);
 
     List<ChangeLogDetail> details = new ArrayList<>();
@@ -126,6 +135,7 @@ public class BasicChangeLogService implements ChangeLogService {
     changeLogDetailRepository.saveAll(details);
     return saved;
   }
+
   // 삭제 전에 실행
   @Override
   public ChangeLog createByDelete(Employee employee, String ipAddress) {
@@ -139,8 +149,7 @@ public class BasicChangeLogService implements ChangeLogService {
     return saved;
   }
 
-  @Override
-  public void addByCreate(List<ChangeLogDetail> details, Employee employee, ChangeLog changeLog) {
+  private void addByCreate(List<ChangeLogDetail> details, Employee employee, ChangeLog changeLog) {
     addDetail(details, changeLog, "입사일", null, employee.getHireDate().toString());
     addDetail(details, changeLog, "이름", null, employee.getName());
     addDetail(details, changeLog, "직함", null, employee.getPosition());
@@ -150,35 +159,48 @@ public class BasicChangeLogService implements ChangeLogService {
     addDetail(details, changeLog, "상태", null, employee.getStatus().toString());
   }
 
-  @Override
-  public void addByUpdate(List<ChangeLogDetail> details, Employee employee,
+  private void addByUpdate(List<ChangeLogDetail> details, Employee employee,
       EmployeeUpdateRequest request, ChangeLog changeLog) {
-    if(request.hireDate()!=null && !employee.getHireDate().equals(request.hireDate())) addDetail(details, changeLog, "입사일", employee.getHireDate().toString(), request.hireDate().toString());
-    if(request.name()!=null && !employee.getName().equals(request.name())) addDetail(details, changeLog, "이름", employee.getName(), request.name());
-    if(request.position()!=null && !employee.getPosition().equals(request.position())) addDetail(details, changeLog, "직함", employee.getPosition(), request.position());
-    if(request.departmentId()!=null){
-      Department department = departmentRepository.findById(request.departmentId()).orElseThrow(() -> new NoSuchElementException("id에 해당하는 부서가 존재하지 않습니다."));
-      String departmentName = department.getName();
-      if(!departmentName.equals(employee.getDepartment().getName())) addDetail(details, changeLog, "부서", employee.getDepartment().getName(), departmentName);
+    if (request.hireDate() != null && !employee.getHireDate().equals(request.hireDate())) {
+      addDetail(details, changeLog, "입사일", employee.getHireDate().toString(),
+          request.hireDate().toString());
     }
-    if(request.email()!=null && !employee.getEmail().equals(request.email())) addDetail(details, changeLog, "이메일", employee.getEmail(), request.email());
-    if(request.status()!=null && !employee.getStatus().equals(request.status())) addDetail(details, changeLog, "상태", employee.getStatus().toString(), request.status().toString());
+    if (request.name() != null && !employee.getName().equals(request.name())) {
+      addDetail(details, changeLog, "이름", employee.getName(), request.name());
+    }
+    if (request.position() != null && !employee.getPosition().equals(request.position())) {
+      addDetail(details, changeLog, "직함", employee.getPosition(), request.position());
+    }
+    if (request.departmentId() != null) {
+      Department department = departmentRepository.findById(request.departmentId())
+          .orElseThrow(() -> new NoSuchElementException("id에 해당하는 부서가 존재하지 않습니다."));
+      String departmentName = department.getName();
+      if (!departmentName.equals(employee.getDepartment().getName())) {
+        addDetail(details, changeLog, "부서", employee.getDepartment().getName(), departmentName);
+      }
+    }
+    if (request.email() != null && !employee.getEmail().equals(request.email())) {
+      addDetail(details, changeLog, "이메일", employee.getEmail(), request.email());
+    }
+    if (request.status() != null && !employee.getStatus().equals(request.status())) {
+      addDetail(details, changeLog, "상태", employee.getStatus().toString(),
+          request.status().toString());
+    }
   }
 
-  @Override
-  public void addByDelete(List<ChangeLogDetail> details, Employee employee, ChangeLog changeLog) {
-    addDetail(details, changeLog, "입사일",  employee.getHireDate().toString(), null);
-    addDetail(details, changeLog, "이름",  employee.getName(), null);
-    addDetail(details, changeLog, "직함",  employee.getPosition(), null);
-    addDetail(details, changeLog, "부서",  employee.getDepartment().getName(), null);
-    addDetail(details, changeLog, "이메일",  employee.getEmail(), null);
-    addDetail(details, changeLog, "사번",  employee.getEmployeeNumber(), null);
-    addDetail(details, changeLog, "상태",  employee.getStatus().toString(), null);
+  private void addByDelete(List<ChangeLogDetail> details, Employee employee, ChangeLog changeLog) {
+    addDetail(details, changeLog, "입사일", employee.getHireDate().toString(), null);
+    addDetail(details, changeLog, "이름", employee.getName(), null);
+    addDetail(details, changeLog, "직함", employee.getPosition(), null);
+    addDetail(details, changeLog, "부서", employee.getDepartment().getName(), null);
+    addDetail(details, changeLog, "이메일", employee.getEmail(), null);
+    addDetail(details, changeLog, "사번", employee.getEmployeeNumber(), null);
+    addDetail(details, changeLog, "상태", employee.getStatus().toString(), null);
 
   }
 
-  @Override
-  public void addDetail(List<ChangeLogDetail> details, ChangeLog changeLog, String property, String before,
+  private void addDetail(List<ChangeLogDetail> details, ChangeLog changeLog, String property,
+      String before,
       String after) {
     ChangeLogDetail detail = new ChangeLogDetail(changeLog, property, before, after);
     details.add(detail);

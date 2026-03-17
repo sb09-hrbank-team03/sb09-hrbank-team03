@@ -199,8 +199,7 @@ public class BasicEmployeeService implements EmployeeService {
     return result;
   }
 
-  @Override
-  public LocalDate convert(LocalDate date, String unit, int amount) {
+  private LocalDate convert(LocalDate date, String unit, int amount) {
     return switch (unit) {
       case "day"     -> date.plusDays(amount);
       case "week"    -> date.plusWeeks(amount);

@@ -1,9 +1,6 @@
 package com.sb09.hrbank.dto.request;
 
 import java.time.Instant;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 public record ChangeLogListRequest(
     String employeeNumber,

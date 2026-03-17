@@ -25,8 +25,6 @@ public interface EmployeeService {
 
   List<EmployeeTrendDto> trend(LocalDate from, LocalDate to, String unit);
 
-  LocalDate convert(LocalDate date, String unit, int amount);
-
   List<EmployeeDistributionDto> distribution(String groupBy, String status);
 
   Long count(String status, LocalDate fromDate, LocalDate toDate);
