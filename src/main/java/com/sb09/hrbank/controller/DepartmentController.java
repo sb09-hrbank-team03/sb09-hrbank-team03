@@ -1,21 +1,22 @@
 package com.sb09.hrbank.controller;
 
+import com.sb09.hrbank.dto.common.CursorPageResponse;
+import com.sb09.hrbank.dto.request.DepartmentSearchRequest;
 import com.sb09.hrbank.dto.response.DepartmentDto;
 import com.sb09.hrbank.dto.request.DepartmentCreateRequest;
 import com.sb09.hrbank.dto.request.DepartmentUpdateRequest;
 import com.sb09.hrbank.service.DepartmentService;
 import jakarta.validation.Valid;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -49,10 +50,10 @@ public class DepartmentController {
   }
 
   @GetMapping
-  public List<DepartmentDto> findAll(
-      @RequestParam(required = false) String keyword
+  public CursorPageResponse<DepartmentDto> searchDepartments(
+      @Valid @ModelAttribute DepartmentSearchRequest request
   ) {
-    return departmentService.findAll(keyword);
+    return departmentService.searchDepartments(request);
   }
 
   @GetMapping("/{id}")
