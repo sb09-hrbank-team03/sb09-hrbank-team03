@@ -5,7 +5,6 @@ import com.sb09.hrbank.dto.request.DepartmentSearchRequest;
 import com.sb09.hrbank.dto.response.DepartmentDto;
 import com.sb09.hrbank.dto.request.DepartmentCreateRequest;
 import com.sb09.hrbank.dto.request.DepartmentUpdateRequest;
-import java.util.List;
 
 public interface DepartmentService {
 
