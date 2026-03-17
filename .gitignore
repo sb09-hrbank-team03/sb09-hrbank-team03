@@ -1,8 +1,7 @@
 HELP.md
 .gradle
 build/
-backup/.csv
-backup/.log
+backup/*.csv
 !gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**/build/
 !**/src/test/**/build/
