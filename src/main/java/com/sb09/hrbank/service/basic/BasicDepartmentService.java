@@ -1,7 +1,7 @@
 package com.sb09.hrbank.service.basic;
+
 import com.sb09.hrbank.dto.request.DepartmentUpdateRequest;
 import com.sb09.hrbank.repository.EmployeeRepository;
-import java.util.List;
 import java.util.NoSuchElementException;
 import org.springframework.transaction.annotation.Transactional;
 import com.sb09.hrbank.dto.response.DepartmentDto;
@@ -12,6 +12,11 @@ import com.sb09.hrbank.repository.DepartmentRepository;
 import com.sb09.hrbank.service.DepartmentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import com.sb09.hrbank.dto.common.CursorPageResponse;
+import com.sb09.hrbank.dto.request.DepartmentSearchRequest;
+import com.sb09.hrbank.dto.request.DepartmentSortField;
+import com.sb09.hrbank.mapper.CursorPageResponseMapper;
+import org.springframework.data.domain.Slice;
 
 @Service
 @RequiredArgsConstructor
@@ -20,6 +25,7 @@ public class BasicDepartmentService implements DepartmentService {
   private final EmployeeRepository employeeRepository;
   private final DepartmentRepository departmentRepository;
   private final DepartmentMapper departmentMapper;
+  private final CursorPageResponseMapper cursorPageResponseMapper;
 
   @Override
   @Transactional
@@ -57,23 +63,24 @@ public class BasicDepartmentService implements DepartmentService {
 
   @Override
   @Transactional(readOnly = true)
-  public List<DepartmentDto> findAll(String keyword) {
-    List<Department> departments;
+  public CursorPageResponse<DepartmentDto> searchDepartments(DepartmentSearchRequest request) {
 
-    if (keyword == null || !keyword.isBlank()) {
-      departments = departmentRepository.findAll();
-    } else {
-      departments = departmentRepository.findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase(
-          keyword, keyword
-      );
-    }
+    Slice<Department> departmentSlice = departmentRepository.searchDepartments(request);
 
-    return departments.stream()
-        .map(department -> {
+    return cursorPageResponseMapper.fromSlice(
+        departmentSlice,
+        department -> {
           int employeeCount = (int) employeeRepository.countByDepartmentId(department.getId());
           return departmentMapper.toDto(department, employeeCount);
-        })
-        .toList();
+        },
+        department -> {
+          if (request.getSortBy() != null && request.getSortBy() == DepartmentSortField.name) {
+            return department.getName();
+          }
+          return department.getEstablishedDate().toString();
+        },
+        Department::getId
+    );
   }
 
   @Override

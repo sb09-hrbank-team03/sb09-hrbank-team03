@@ -1,11 +1,11 @@
 package com.sb09.hrbank.repository;
 
 import com.sb09.hrbank.dto.request.DepartmentSearchRequest;
-import com.sb09.hrbank.dto.response.DepartmentDto;
+import com.sb09.hrbank.entity.Department;
 import org.springframework.data.domain.Slice;
 
 public interface DepartmentRepositoryCustom {
 
-  Slice<DepartmentDto> searchDepartments(DepartmentSearchRequest request);
+  Slice<Department> searchDepartments(DepartmentSearchRequest request);
 
 }

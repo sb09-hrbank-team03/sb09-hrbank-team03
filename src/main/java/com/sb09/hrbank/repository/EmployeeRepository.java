@@ -36,15 +36,10 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long>,
   List<Object[]> countGroupByPosition(@Param("status") WorkStatus status);
 
   Long countByHireDateBetween(LocalDate from, LocalDate to);
-  
+
   Long countByHireDateBetweenAndStatus(LocalDate from, LocalDate to, WorkStatus status);
 
   boolean existsByDepartmentId(Long departmentId);
 
   long countByDepartmentId(Long departmentId);
-
-  boolean existsByDepartmentId(Long departmentId);
-
-  long countByDepartmentId(Long departmentId);
-
 }
