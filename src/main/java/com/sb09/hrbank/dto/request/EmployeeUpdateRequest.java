@@ -9,7 +9,8 @@ public record EmployeeUpdateRequest(
     Long departmentId,
     String position,
     LocalDate hireDate,
-    WorkStatus status
+    WorkStatus status,
+    String memo
 ) {
 
 }

@@ -20,11 +20,13 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.util.List;
-
 import java.util.NoSuchElementException;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,6 +42,12 @@ public class BasicBackupService implements BackupService {
   private final EmployeeRepository employeeRepository;
   private final BasicFileService fileService;
   private final CsvBackupWriter csvBackupWriter;
+
+  @Value("${backup.batch-size:100}")
+  private int batchSize;
+
+  @Value("${backup.csv-path:./backup/}")
+  private String csvPath;
 
   @Override
   @Transactional
@@ -85,7 +93,6 @@ public class BasicBackupService implements BackupService {
   }
 
   private boolean isBackupRequired() {
-
     return backupRepository
         .findFirstByBackupStatusOrderByStartedAtDesc(BackupStatus.COMPLETED)
         .map(last -> employeeRepository.existsByUpdatedAtAfter(last.getStartedAt()))
@@ -118,10 +125,10 @@ public class BasicBackupService implements BackupService {
     return backupMapper.toDto(history);
   }
 
-
   private FileMeta executeBackup() throws IOException {
 
-    Path path = csvBackupWriter.createCsv();
+    Path path = Path.of(csvPath, "backup-" + System.currentTimeMillis() + ".csv");
+    Files.createDirectories(path.getParent());
 
     try (BufferedWriter writer = Files.newBufferedWriter(path)) {
 
@@ -132,11 +139,9 @@ public class BasicBackupService implements BackupService {
       while (true) {
 
         List<Employee> employees =
-            employeeRepository.findTop100ByIdGreaterThanOrderByIdAsc(lastId);
+            employeeRepository.findByIdGreaterThanOrderByIdAsc(lastId, PageRequest.of(0, batchSize));
 
-        if (employees.isEmpty()) {
-          break;
-        }
+        if (employees.isEmpty()) break;
 
         for (Employee e : employees) {
 
@@ -149,7 +154,6 @@ public class BasicBackupService implements BackupService {
                   escape(e.getStatus().name()) + "," +
                   escape(String.valueOf(e.getHireDate()))
           );
-
           writer.newLine();
 
           lastId = e.getId();
@@ -171,12 +175,19 @@ public class BasicBackupService implements BackupService {
 
   private FileMeta createErrorLog(Exception e) throws IOException {
 
-    Path path = Path.of("backup/error-" + System.currentTimeMillis() + ".log");
-
+    Path path = Path.of(csvPath, "error-" + System.currentTimeMillis() + ".log");
     Files.createDirectories(path.getParent());
 
-    Files.writeString(path, e.getMessage());
+    StringBuilder logContent = new StringBuilder();
 
-    return fileService.save(path);
+    logContent.append("Exception: ").append(String.valueOf(e)).append("\n");
+
+    for (StackTraceElement element : e.getStackTrace()) {
+      logContent.append("\tat ").append(element).append("\n");
+    }
+
+    Files.writeString(path, logContent.toString());
+
+    return fileService.saveLog(path);
   }
 }

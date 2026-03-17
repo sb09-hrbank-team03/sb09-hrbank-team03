@@ -1,6 +1,6 @@
 server:
   port: ${PORT:8080}
-hr_bank:
+hrbank:
   storage:
     type: local
     local:
@@ -11,19 +11,19 @@ hr_bank:
         max-request-size: 10MB
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/hr_bank
-    username: hr_user
-    password: 1234
+    url: jdbc:postgresql://localhost:5432/hrbank
+    username: hrbank_user
+    password: hrbank1234
     driver-class-name: org.postgresql.Driver
 
   jpa:
     open-in-view: false
     hibernate:
-      ddl-auto: create # create / validate
+      ddl-auto: validate # create / validate
     show-sql: false
     defer-datasource-initialization: true
   application:
-    name: hr_bank
+    name: hrbank
 
 logging:
   level:
@@ -31,4 +31,6 @@ logging:
     org.hibernate.orm.jdbc.bind: trace
 
 backup:
-  schedule: 3600000
+  schedule: 3600000       # 1시간 (ms 단위)
+  batch-size: 100         # 한 번에 처리할 직원 수
+  csv-path: "./backup/"   # 백업 CSV 저장 경로
