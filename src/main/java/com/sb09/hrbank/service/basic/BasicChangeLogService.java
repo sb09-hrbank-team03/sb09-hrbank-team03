@@ -16,7 +16,6 @@ import com.sb09.hrbank.mapper.ChangeLogMapper;
 import com.sb09.hrbank.mapper.CursorPageResponseMapper;
 import com.sb09.hrbank.repository.ChangeLogDetailRepository;
 import com.sb09.hrbank.repository.ChangeLogRepository;
-import com.sb09.hrbank.repository.ChangeLogSpecification;
 import com.sb09.hrbank.repository.DepartmentRepository;
 import com.sb09.hrbank.service.ChangeLogService;
 import java.time.Instant;
@@ -25,10 +24,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -72,37 +67,12 @@ public class BasicChangeLogService implements ChangeLogService {
   @Transactional(readOnly = true)
   @Override
   public CursorPageResponse<ChangeLogDto> history(ChangeLogListRequest request) {
-    Sort sort;
-    String sortField = (request.sortField() != null
-        && !request.sortField().isEmpty()) ? request.sortField() : "at";
-    String sortDirection = (request.sortDirection() != null
-        && !request.sortDirection().isEmpty()) ? request.sortDirection() : "desc";
-    Integer size = request.size() != null ? request.size() : 10;
-    if (sortField.equals("at")) {
-      sort = Sort.by(Sort.Direction.fromString(sortDirection), "createdAt")
-          .and(Sort.by(Sort.Direction.DESC, "id"));
-    } else {
-      sort = Sort.by(Sort.Direction.fromString(sortDirection), "ipAddress")
-          .and(Sort.by(Sort.Direction.DESC, "id"));
-    }
-    Pageable pageable = PageRequest.of(0, size, sort);
-    Slice<ChangeLog> logSlice;
-    logSlice = changeLogRepository.findAll(
-        ChangeLogSpecification.build(request),
-        pageable
-    );
-
+    var slice = changeLogRepository.searchChangeLogs(request);
     return cursorPageResponseMapper.fromSlice(
-        logSlice,
-        log -> changeLogMapper.toDto(log),
-        log -> {
-          if (sortField.equals("at")) {
-            return log.getCreatedAt();
-          }
-
-          return log.getIpAddress();
-        },
-        log -> log.getId()
+        slice,
+        changeLogMapper::toDto,
+        ChangeLog::getCreatedAt,
+        ChangeLog::getId
     );
   }
 
