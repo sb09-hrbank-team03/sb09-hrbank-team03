@@ -157,9 +157,9 @@ public class BasicEmployeeService implements EmployeeService {
       LocalDate nextFlag = convert(flag, unit, 1);
       Long count = employeeRepository.countByHireDateLessThanEqual(flag);
       Long change = count - prevCount;
-      double changeRate = prevCount > 0 ? (double) change / prevCount * 100 : 0.0;
-      String changeRateToString = String.format("%.1f", changeRate);
-      EmployeeTrendDto dto = new EmployeeTrendDto(flag, count, change, changeRateToString);
+      double changeRate = prevCount > 0 ? (double) change / prevCount * 100.0 : 0.0;
+      String changeString = String.format("%.1f", changeRate);
+      EmployeeTrendDto dto = new EmployeeTrendDto(flag, count, change, changeString);
       result.add(dto);
       prevCount = count;
       flag = nextFlag;
@@ -190,11 +190,10 @@ public class BasicEmployeeService implements EmployeeService {
             : employeeRepository.countGroupByDepartment(workStatus);
     Long total = employeeRepository.countByStatus(workStatus);
     for (Object[] o : countWithGroup) {
-      // math.round가 결과가 정수로 나와서 소수점 표현 때문에 100 대신 1000 곱하고 10으로 나눔.
-      double percentage =
-          total != 0 ? Math.round(((Number) o[1]).doubleValue() / total * 1000.0) / 10.0 : 0.0;
+      double percentage = total != 0 ? ((Number) o[1]).doubleValue() / total * 100.0 : 0.0;
+      String percentString = String.format("%.1f", percentage);
       EmployeeDistributionDto dto = new EmployeeDistributionDto((String) o[0],
-          ((Number) o[1]).longValue(), percentage);
+          ((Number) o[1]).longValue(), percentString);
       dtos.add(dto);
     }
     return dtos;
