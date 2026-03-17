@@ -1,6 +1,6 @@
 server:
   port: ${PORT:8080}
-hr_bank:
+hrbank:
   storage:
     type: local
     local:
@@ -23,7 +23,7 @@ spring:
     show-sql: false
     defer-datasource-initialization: true
   application:
-    name: hr_bank
+    name: hrbank
 
 logging:
   level:
@@ -31,4 +31,6 @@ logging:
     org.hibernate.orm.jdbc.bind: trace
 
 backup:
-  schedule: 3600000
+  schedule: 3600000       # 1시간 (ms 단위)
+  batch-size: 100         # 한 번에 처리할 직원 수
+  csv-path: "./backup/"   # 백업 CSV 저장 경로
