@@ -2,6 +2,7 @@ package com.sb09.hrbank.service.basic;
 
 import com.sb09.hrbank.dto.request.DepartmentUpdateRequest;
 import com.sb09.hrbank.repository.EmployeeRepository;
+import java.util.List;
 import java.util.NoSuchElementException;
 import org.springframework.transaction.annotation.Transactional;
 import com.sb09.hrbank.dto.response.DepartmentDto;
@@ -50,6 +51,37 @@ public class BasicDepartmentService implements DepartmentService {
     }
 
     department.update(request.name(), request.description(), request.establishedDate());
+
+    int employeeCount = (int) employeeRepository.countByDepartmentId(department.getId());
+    return departmentMapper.toDto(department, employeeCount);
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public List<DepartmentDto> findAll(String keyword) {
+    List<Department> departments;
+
+    if (keyword == null || !keyword.isBlank()) {
+      departments = departmentRepository.findAll();
+    } else {
+      departments = departmentRepository.findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase(
+          keyword, keyword
+      );
+    }
+
+    return departments.stream()
+        .map(department -> {
+          int employeeCount = (int) employeeRepository.countByDepartmentId(department.getId());
+          return departmentMapper.toDto(department, employeeCount);
+        })
+        .toList();
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public DepartmentDto findById(Long id) {
+    Department department = departmentRepository.findById(id)
+        .orElseThrow(() -> new NoSuchElementException("존재하지 않는 부서입니다."));
 
     int employeeCount = (int) employeeRepository.countByDepartmentId(department.getId());
     return departmentMapper.toDto(department, employeeCount);
