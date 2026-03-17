@@ -7,7 +7,7 @@ import java.util.List;
 public record ChangeLogDetailDto (
     Long id,
     ChangeType type,
-    String emplyeeNumber,
+    String employeeNumber,
     String memo,
     String ipAddress,
     Instant at,
