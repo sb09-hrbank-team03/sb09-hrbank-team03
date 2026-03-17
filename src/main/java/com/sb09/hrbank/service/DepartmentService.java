@@ -1,5 +1,7 @@
 package com.sb09.hrbank.service;
 
+import com.sb09.hrbank.dto.common.CursorPageResponse;
+import com.sb09.hrbank.dto.request.DepartmentSearchRequest;
 import com.sb09.hrbank.dto.response.DepartmentDto;
 import com.sb09.hrbank.dto.request.DepartmentCreateRequest;
 import com.sb09.hrbank.dto.request.DepartmentUpdateRequest;
@@ -13,7 +15,7 @@ public interface DepartmentService {
 
   DepartmentDto findById(Long id);
 
-  List<DepartmentDto> findAll(String keyword);
+  CursorPageResponse<DepartmentDto> searchDepartments(DepartmentSearchRequest request);
 
   void delete(Long id);
 
