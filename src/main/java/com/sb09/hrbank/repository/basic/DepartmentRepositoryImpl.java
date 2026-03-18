@@ -11,6 +11,7 @@ import com.sb09.hrbank.entity.QDepartment;
 import com.sb09.hrbank.repository.DepartmentRepositoryCustom;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -42,7 +43,7 @@ public class DepartmentRepositoryImpl implements DepartmentRepositoryCustom {
 
     boolean hasNext = results.size() > size;
     if (hasNext) {
-      results = new java.util.ArrayList<>(results).subList(0, size);
+      results = new ArrayList<>(results).subList(0, size);
     }
     return new SliceImpl<>(results, PageRequest.of(0, size), hasNext);
   }
