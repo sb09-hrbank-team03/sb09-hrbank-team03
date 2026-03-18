@@ -8,4 +8,6 @@ public interface DepartmentRepositoryCustom {
 
   Slice<Department> searchDepartments(DepartmentSearchRequest request);
 
+  long countDepartments(DepartmentSearchRequest request);
+
 }
