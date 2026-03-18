@@ -18,6 +18,7 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -34,6 +35,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 public class BasicBackupService implements BackupService {
+
+  private static final Duration RECENT_BACKUP_WINDOW = Duration.ofHours(1);
 
   private final BackupRepository backupRepository;
   private final BackupMapper backupMapper;
@@ -193,10 +196,12 @@ public class BasicBackupService implements BackupService {
     return fileService.saveLog(path);
   }
 
+  @Override
+  @Transactional(readOnly = true)
   public boolean isRecentlyBackedUp() {
+    Instant threshold = Instant.now().minus(RECENT_BACKUP_WINDOW);
     return backupRepository.findTopByOrderByStartedAtDesc()
-        .map(backup -> backup.getStartedAt()
-            .isAfter(Instant.now().minusSeconds(3600)))
+        .map(backup -> backup.getStartedAt().isAfter(threshold))
         .orElse(false);
   }
 }
