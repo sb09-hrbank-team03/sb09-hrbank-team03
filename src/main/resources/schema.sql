@@ -83,7 +83,6 @@ CREATE TABLE employee_history_details
     property varchar(100) NOT NULL,
     before_value varchar(100),
     after_value varchar(100),
-    started_at timestamptz NOT NULL,
     history_id bigint NOT NULL
 );
 
