@@ -33,7 +33,7 @@ public class DepartmentRepositoryImpl implements DepartmentRepositoryCustom {
     List<Department> results = queryFactory
         .selectFrom(department)
         .where(
-            keywordContains(request.getKeyword()),
+            keywordContains(request.getNameOrDescription()),
             cursorCondition(request)
         )
         .orderBy(primaryOrder(request), idOrder(request))

@@ -12,7 +12,7 @@ import org.springframework.data.domain.Sort;
 @NoArgsConstructor
 public class DepartmentSearchRequest {
 
-  private String keyword;
+  private String nameOrDescription;
 
   private String cursor;
 
