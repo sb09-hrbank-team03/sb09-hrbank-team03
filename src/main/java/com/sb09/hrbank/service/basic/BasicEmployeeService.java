@@ -138,7 +138,7 @@ public class BasicEmployeeService implements EmployeeService {
     );
   }
 
-  private Object getCursorValue(EmployeeDto dto, EmployeeSearchRequest request) {
+  private String getCursorValue(EmployeeDto dto, EmployeeSearchRequest request) {
     EmployeeSortField sortField = request.getSortField();
     if (sortField == null) {
       sortField = EmployeeSortField.name;
@@ -255,3 +255,4 @@ public class BasicEmployeeService implements EmployeeService {
     return count;
   }
 }
+

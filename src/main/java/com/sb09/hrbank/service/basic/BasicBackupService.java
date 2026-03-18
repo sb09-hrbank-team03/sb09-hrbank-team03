@@ -112,7 +112,7 @@ public class BasicBackupService implements BackupService {
     return cursorMapper.fromSlice(
         slice,
         backupMapper::toDto,
-        BackupHistory::getStartedAt,
+        history -> history.getStartedAt() != null ? history.getStartedAt().toString() : null,
         BackupHistory::getId,
         totalElements
     );

@@ -33,7 +33,7 @@ public class DepartmentRepositoryImpl implements DepartmentRepositoryCustom {
     List<Department> results = queryFactory
         .selectFrom(department)
         .where(
-            keywordContains(request.getKeyword()),
+            nameOrDescriptionContains(request.getNameOrDescription()),
             cursorCondition(request)
         )
         .orderBy(primaryOrder(request), idOrder(request))
@@ -42,37 +42,47 @@ public class DepartmentRepositoryImpl implements DepartmentRepositoryCustom {
 
     boolean hasNext = results.size() > size;
     if (hasNext) {
-      results.remove(size);
+      results = new java.util.ArrayList<>(results).subList(0, size);
     }
     return new SliceImpl<>(results, PageRequest.of(0, size), hasNext);
   }
 
-  private BooleanExpression keywordContains(String keyword) {
-    if (keyword == null || keyword.isBlank()) {
+  @Override
+  public long countDepartments(DepartmentSearchRequest request) {
+    Long count = queryFactory
+        .select(department.count())
+        .from(department)
+        .where(nameOrDescriptionContains(request.getNameOrDescription()))
+        .fetchOne();
+    return count != null ? count : 0L;
+  }
+
+  private BooleanExpression nameOrDescriptionContains(String nameOrDescription) {
+    if (nameOrDescription == null || nameOrDescription.isBlank()) {
       return null;
     }
-    return department.name.containsIgnoreCase(keyword)
-        .or(department.description.containsIgnoreCase(keyword));
+    return department.name.containsIgnoreCase(nameOrDescription)
+        .or(department.description.containsIgnoreCase(nameOrDescription));
   }
 
   private BooleanExpression cursorCondition(DepartmentSearchRequest request) {
-    if (request.getCursor() == null || request.getLastElementId() == null) {
+    if (request.getCursor() == null || request.getIdAfter() == null) {
       return null;
     }
     Sort.Direction sortDirection =
-        request.getSortDirection() == null ? Sort.Direction.DESC : request.getSortDirection();
+        request.getSortDirection() == null ? Sort.Direction.ASC : request.getSortDirection();
     DepartmentSortField sortField =
-        request.getSortBy() == null ? DepartmentSortField.establishedDate : request.getSortBy();
+        request.getSortField() == null ? DepartmentSortField.establishedDate : request.getSortField();
 
     return switch (sortField) {
       case name ->
-          compareWithTieBreaker(department.name, request.getCursor(), request.getLastElementId(),
+          compareWithTieBreaker(department.name, request.getCursor(), request.getIdAfter(),
               sortDirection);
       case establishedDate -> {
         try {
           LocalDate cursorDate = LocalDate.parse(request.getCursor());
           yield compareWithTieBreaker(department.establishedDate, cursorDate,
-              request.getLastElementId(), sortDirection);
+              request.getIdAfter(), sortDirection);
         } catch (DateTimeParseException e) {
           throw new IllegalArgumentException("설립일 커서 형식이 올바르지 않습니다. cursor=" +
               request.getCursor(), e);
@@ -91,10 +101,10 @@ public class DepartmentRepositoryImpl implements DepartmentRepositoryCustom {
 
   private OrderSpecifier<?> primaryOrder(DepartmentSearchRequest request) {
     boolean isDesc =
-        (request.getSortDirection() == null ? Sort.Direction.DESC : request.getSortDirection())
+        (request.getSortDirection() == null ? Sort.Direction.ASC : request.getSortDirection())
             == Sort.Direction.DESC;
     DepartmentSortField sortField =
-        request.getSortBy() == null ? DepartmentSortField.establishedDate : request.getSortBy();
+        request.getSortField() == null ? DepartmentSortField.establishedDate : request.getSortField();
     return switch (sortField) {
       case name -> isDesc ? department.name.desc() : department.name.asc();
       case establishedDate ->
@@ -104,7 +114,7 @@ public class DepartmentRepositoryImpl implements DepartmentRepositoryCustom {
 
   private OrderSpecifier<Long> idOrder(DepartmentSearchRequest request) {
     boolean isDesc =
-        (request.getSortDirection() == null ? Sort.Direction.DESC : request.getSortDirection())
+        (request.getSortDirection() == null ? Sort.Direction.ASC : request.getSortDirection())
             == Sort.Direction.DESC;
     return isDesc ? department.id.desc() : department.id.asc();
   }

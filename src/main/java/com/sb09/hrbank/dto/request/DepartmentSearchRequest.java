@@ -12,17 +12,17 @@ import org.springframework.data.domain.Sort;
 @NoArgsConstructor
 public class DepartmentSearchRequest {
 
-  private String keyword;
+  private String nameOrDescription;
 
   private String cursor;
 
-  private Long lastElementId;
+  private Long idAfter;
 
   @Min(1)
   @Max(100)
   private int size = 10;
 
-  private DepartmentSortField sortBy = DepartmentSortField.establishedDate;
+  private DepartmentSortField sortField = DepartmentSortField.establishedDate;
 
-  private Sort.Direction sortDirection = Sort.Direction.DESC;
+  private Sort.Direction sortDirection = Sort.Direction.ASC;
 }

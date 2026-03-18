@@ -85,7 +85,7 @@ public class BasicDepartmentService implements DepartmentService {
         .collect(Collectors.toSet());
     Map<Long, Long> employeeCountMap = getEmployeeCountsByDepartmentIds(departmentIds);
 
-    Long totalElements = departmentRepository.count();
+    Long totalElements = departmentRepository.countDepartments(request);
 
     return cursorPageResponseMapper.fromSlice(
         departmentSlice,
@@ -94,7 +94,7 @@ public class BasicDepartmentService implements DepartmentService {
           return departmentMapper.toDto(department, employeeCount);
         },
         department -> {
-          if (request.getSortBy() != null && request.getSortBy() == DepartmentSortField.name) {
+          if (request.getSortField() != null && request.getSortField() == DepartmentSortField.name) {
             return department.getName();
           }
           return department.getEstablishedDate().toString();
