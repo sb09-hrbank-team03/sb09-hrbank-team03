@@ -72,7 +72,7 @@ public class BasicChangeLogService implements ChangeLogService {
     return cursorPageResponseMapper.fromSlice(
         slice,
         changeLogMapper::toDto,
-        ChangeLog::getCreatedAt,
+        log -> log.getCreatedAt() != null ? log.getCreatedAt().toString() : null,
         ChangeLog::getId,
         totalElements
     );
