@@ -23,7 +23,7 @@ public class BackupListRequest {
 
   private Instant startedAtTo;
 
-  private Instant cursor;
+  private String cursor;
 
   private Long idAfter;
 

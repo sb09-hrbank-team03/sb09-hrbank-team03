@@ -4,6 +4,7 @@ import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.sb09.hrbank.dto.request.BackupListRequest;
+import com.sb09.hrbank.dto.request.BackupSortField;
 import com.sb09.hrbank.entity.BackupHistory;
 import com.sb09.hrbank.entity.BackupStatus;
 import com.sb09.hrbank.entity.QBackupHistory;
@@ -29,7 +30,9 @@ public class BackupRepositoryImpl implements BackupRepositoryCustom {
   @Override
   public Slice<BackupHistory> searchBackups(BackupListRequest request) {
 
+    boolean isDesc = request.getSortDirection() == Sort.Direction.DESC;
     OrderSpecifier<?> order = getOrder(request);
+    OrderSpecifier<?> idOrder = isDesc ? backup.id.desc() : backup.id.asc();
 
     List<BackupHistory> results = queryFactory
         .selectFrom(backup)
@@ -40,7 +43,7 @@ public class BackupRepositoryImpl implements BackupRepositoryCustom {
             startedAtLoe(request.getStartedAtTo()),
             cursorCondition(request)
         )
-        .orderBy(order, backup.id.desc())
+        .orderBy(order, idOrder)
         .limit(request.getSize() + 1)
         .fetch();
 
@@ -87,15 +90,56 @@ public class BackupRepositoryImpl implements BackupRepositoryCustom {
 
   private BooleanExpression cursorCondition(BackupListRequest request) {
 
-    if (request.getCursor() == null || request.getIdAfter() == null) {
+    if (request.getIdAfter() == null) {
       return null;
     }
 
-    return backup.startedAt.lt(request.getCursor())
-        .or(
-            backup.startedAt.eq(request.getCursor())
-                .and(backup.id.lt(request.getIdAfter()))
-        );
+    boolean isDesc = request.getSortDirection() == Sort.Direction.DESC;
+    String cursor = request.getCursor();
+
+    if (request.getSortField() == BackupSortField.startedAt && cursor != null) {
+      Instant cursorInstant = Instant.parse(cursor);
+      if (isDesc) {
+        return backup.startedAt.lt(cursorInstant)
+            .or(backup.startedAt.eq(cursorInstant)
+                .and(backup.id.lt(request.getIdAfter())));
+      } else {
+        return backup.startedAt.gt(cursorInstant)
+            .or(backup.startedAt.eq(cursorInstant)
+                .and(backup.id.gt(request.getIdAfter())));
+      }
+    }
+
+    if (request.getSortField() == BackupSortField.endedAt && cursor != null) {
+      Instant cursorInstant = Instant.parse(cursor);
+      if (isDesc) {
+        return backup.endedAt.lt(cursorInstant)
+            .or(backup.endedAt.eq(cursorInstant)
+                .and(backup.id.lt(request.getIdAfter())));
+      } else {
+        return backup.endedAt.gt(cursorInstant)
+            .or(backup.endedAt.eq(cursorInstant)
+                .and(backup.id.gt(request.getIdAfter())));
+      }
+    }
+
+    if (request.getSortField() == BackupSortField.status && cursor != null) {
+      // status는 문자열(EnumType.STRING)로 저장되므로 문자열 비교 사용
+      if (isDesc) {
+        return backup.backupStatus.stringValue().lt(cursor)
+            .or(backup.backupStatus.stringValue().eq(cursor)
+                .and(backup.id.lt(request.getIdAfter())));
+      } else {
+        return backup.backupStatus.stringValue().gt(cursor)
+            .or(backup.backupStatus.stringValue().eq(cursor)
+                .and(backup.id.gt(request.getIdAfter())));
+      }
+    }
+
+    // cursor가 없는 경우 id만으로 페이지네이션
+    return isDesc
+        ? backup.id.lt(request.getIdAfter())
+        : backup.id.gt(request.getIdAfter());
   }
 
   private OrderSpecifier<?> getOrder(BackupListRequest request) {
