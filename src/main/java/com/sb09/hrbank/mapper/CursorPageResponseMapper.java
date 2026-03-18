@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 public class CursorPageResponseMapper {
 
   public <T, R> CursorPageResponse<R> fromSlice(Slice<T> slice, Function<T, R> converter,
-      Function<T, Object> cursorExtractor, Function<T, Long> idExtractor ) {
+      Function<T, Object> cursorExtractor, Function<T, Long> idExtractor, Long totalElements) {
     List<R> dtos = slice.getContent().stream()
         .map(converter)
         .toList();
@@ -28,7 +28,7 @@ public class CursorPageResponseMapper {
         nextCursor,
         nextIdAfter,
         slice.getSize(),
-        null,
+        totalElements,
         slice.hasNext()
     );
   }

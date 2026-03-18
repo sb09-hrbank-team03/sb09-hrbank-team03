@@ -68,11 +68,13 @@ public class BasicChangeLogService implements ChangeLogService {
   @Override
   public CursorPageResponse<ChangeLogDto> history(ChangeLogListRequest request) {
     var slice = changeLogRepository.searchChangeLogs(request);
+    Long totalElements = changeLogRepository.count();
     return cursorPageResponseMapper.fromSlice(
         slice,
         changeLogMapper::toDto,
         ChangeLog::getCreatedAt,
-        ChangeLog::getId
+        ChangeLog::getId,
+        totalElements
     );
   }
 

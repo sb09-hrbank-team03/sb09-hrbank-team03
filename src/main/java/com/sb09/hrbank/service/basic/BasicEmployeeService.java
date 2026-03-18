@@ -128,11 +128,13 @@ public class BasicEmployeeService implements EmployeeService {
   @Transactional(readOnly = true)
   public CursorPageResponse<EmployeeDto> findAll(EmployeeSearchRequest request) {
     Slice<EmployeeDto> slice = employeeRepository.searchEmployees(request);
+    Long totalElements = employeeRepository.count();
     return cursorPageResponseMapper.fromSlice(
         slice,
         dto -> dto,
         dto -> getCursorValue(dto, request),
-        EmployeeDto::id
+        EmployeeDto::id,
+        totalElements
     );
   }
 
