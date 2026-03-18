@@ -4,7 +4,7 @@ import java.util.List;
 
 public record CursorPageResponse<T>(
     List<T> content,
-    Object nextCursor,
+    String nextCursor,
     Long nextIdAfter,
     int size,
     Long totalElements,

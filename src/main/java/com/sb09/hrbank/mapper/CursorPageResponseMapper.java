@@ -12,11 +12,11 @@ import org.springframework.stereotype.Component;
 public class CursorPageResponseMapper {
 
   public <T, R> CursorPageResponse<R> fromSlice(Slice<T> slice, Function<T, R> converter,
-      Function<T, Object> cursorExtractor, Function<T, Long> idExtractor, Long totalElements) {
+      Function<T, String> cursorExtractor, Function<T, Long> idExtractor, Long totalElements) {
     List<R> dtos = slice.getContent().stream()
         .map(converter)
         .toList();
-    Object nextCursor = null;
+    String nextCursor = null;
     Long nextIdAfter = null;
     if (slice.hasNext() && !slice.getContent().isEmpty()) {
       T last = slice.getContent().get(slice.getContent().size() - 1);
