@@ -141,7 +141,7 @@ public class BasicDepartmentService implements DepartmentService {
         .orElseThrow(() -> new NoSuchElementException("존재하지 않는 부서입니다."));
 
     if (employeeRepository.existsByDepartmentId(id)) {
-      throw new IllegalArgumentException("소속 직원이 있는 부서는 삭제할 수 없습니다.");
+      throw new IllegalStateException("소속 직원이 있는 부서는 삭제할 수 없습니다.");
     }
     departmentRepository.delete(department);
   }

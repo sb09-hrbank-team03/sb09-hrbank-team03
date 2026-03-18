@@ -16,7 +16,7 @@ public class GlobalExceptionHandler {
     ErrorResponse response = new ErrorResponse(
         Instant.now(),
         HttpStatus.BAD_REQUEST.value(),
-        "잘못된 요청입니다.",
+        "IllegalArgumentException",
         e.getMessage()
     );
     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
@@ -27,7 +27,7 @@ public class GlobalExceptionHandler {
     ErrorResponse response = new ErrorResponse(
         Instant.now(),
         HttpStatus.NOT_FOUND.value(),
-        "리소스를 찾을 수 없습니다.",
+        "NoSuchElementException",
         e.getMessage()
     );
     return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
@@ -38,11 +38,11 @@ public class GlobalExceptionHandler {
   public ResponseEntity<ErrorResponse> handleException(IllegalStateException e){
     ErrorResponse response = new ErrorResponse(
         Instant.now(),
-        HttpStatus.CONFLICT.value(),
-        "요청 충돌",
+        HttpStatus.BAD_REQUEST.value(),
+        "IllegalStateException",
         e.getMessage()
     );
-    return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
   }
 
   @ExceptionHandler(Exception.class)
@@ -50,7 +50,7 @@ public class GlobalExceptionHandler {
     ErrorResponse response = new ErrorResponse(
         Instant.now(),
         HttpStatus.INTERNAL_SERVER_ERROR.value(),
-        "서버 내부 오류가 발생했습니다.",
+        "Exception",
         e.getMessage()
     );
     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
