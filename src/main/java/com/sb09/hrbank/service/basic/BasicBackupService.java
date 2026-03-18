@@ -104,12 +104,14 @@ public class BasicBackupService implements BackupService {
   public CursorPageResponse<BackupDto> getBackups(BackupListRequest request) {
 
     var slice = backupRepository.searchBackups(request);
+    Long totalElements = backupRepository.count();
 
     return cursorMapper.fromSlice(
         slice,
         backupMapper::toDto,
         BackupHistory::getStartedAt,
-        BackupHistory::getId
+        BackupHistory::getId,
+        totalElements
     );
   }
 
