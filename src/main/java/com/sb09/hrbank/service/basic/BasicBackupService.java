@@ -182,7 +182,7 @@ public class BasicBackupService implements BackupService {
 
     StringBuilder logContent = new StringBuilder();
 
-    logContent.append("Exception: ").append(String.valueOf(e)).append("\n");
+    logContent.append("Exception: ").append(e).append("\n");
 
     for (StackTraceElement element : e.getStackTrace()) {
       logContent.append("\tat ").append(element).append("\n");
@@ -191,5 +191,12 @@ public class BasicBackupService implements BackupService {
     Files.writeString(path, logContent.toString());
 
     return fileService.saveLog(path);
+  }
+
+  public boolean isRecentlyBackedUp() {
+    return backupRepository.findTopByOrderByStartedAtDesc()
+        .map(backup -> backup.getStartedAt()
+            .isAfter(Instant.now().minusSeconds(3600)))
+        .orElse(false);
   }
 }

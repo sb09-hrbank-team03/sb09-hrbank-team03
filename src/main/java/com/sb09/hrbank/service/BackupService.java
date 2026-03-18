@@ -12,4 +12,6 @@ public interface BackupService {
   CursorPageResponse<BackupDto> getBackups(BackupListRequest request);
 
   BackupDto getLatestBackup(BackupStatus status);
+
+  boolean isRecentlyBackedUp();
 }
