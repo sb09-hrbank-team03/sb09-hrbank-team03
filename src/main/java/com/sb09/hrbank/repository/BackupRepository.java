@@ -12,4 +12,6 @@ public interface BackupRepository
   boolean existsByBackupStatus(BackupStatus backupStatus);
 
   Optional<BackupHistory> findFirstByBackupStatusOrderByStartedAtDesc(BackupStatus status);
+
+  Optional<BackupHistory> findTopByOrderByStartedAtDesc();
 }
