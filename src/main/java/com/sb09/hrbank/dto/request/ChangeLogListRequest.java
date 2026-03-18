@@ -1,6 +1,7 @@
 package com.sb09.hrbank.dto.request;
 
 import com.sb09.hrbank.entity.ChangeType;
+import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import java.time.Instant;
 import lombok.Getter;
@@ -22,6 +23,7 @@ public class ChangeLogListRequest{
   private Instant cursor;
 
   @Min(1)
+  @Max(100)
   private int size = 10;
   private ChangeLogSortField sortField = ChangeLogSortField.at;
   private Sort.Direction sortDirection = Sort.Direction.DESC;
