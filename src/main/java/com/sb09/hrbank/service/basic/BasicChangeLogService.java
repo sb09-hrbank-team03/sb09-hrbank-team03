@@ -2,6 +2,7 @@ package com.sb09.hrbank.service.basic;
 
 import com.sb09.hrbank.dto.common.CursorPageResponse;
 import com.sb09.hrbank.dto.request.ChangeLogListRequest;
+import com.sb09.hrbank.dto.request.ChangeLogSortField;
 import com.sb09.hrbank.dto.request.EmployeeUpdateRequest;
 import com.sb09.hrbank.dto.response.ChangeLogDetailDto;
 import com.sb09.hrbank.dto.response.ChangeLogDto;
@@ -72,9 +73,12 @@ public class BasicChangeLogService implements ChangeLogService {
     return cursorPageResponseMapper.fromSlice(
         slice,
         changeLogMapper::toDto,
-        log -> switch (request.getSortField()) {
-          case at -> log.getCreatedAt().toString();
-          case ipAddress -> log.getIpAddress();
+        log -> {
+          if (request.getSortField() == ChangeLogSortField.ipAddress) {
+            return log.getIpAddress();
+          }
+          // 기본: at (createdAt)
+          return log.getCreatedAt() != null ? log.getCreatedAt().toString() : null;
         },
         ChangeLog::getId,
         totalElements
