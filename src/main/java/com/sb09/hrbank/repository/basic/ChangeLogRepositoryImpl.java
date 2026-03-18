@@ -28,7 +28,7 @@ public class ChangeLogRepositoryImpl implements ChangeLogRepositoryCustom {
   public Slice<ChangeLog> searchChangeLogs(ChangeLogListRequest request) {
 
     OrderSpecifier<?> order = getOrder(request);
-
+    boolean isDesc = request.getSortDirection() == Sort.Direction.DESC;
     List<ChangeLog> results = queryFactory
         .selectFrom(changeLog)
         .where(
@@ -40,7 +40,7 @@ public class ChangeLogRepositoryImpl implements ChangeLogRepositoryCustom {
             atLoe(request.getAtTo()),
             cursorCondition(request)
         )
-        .orderBy(order, changeLog.id.desc())
+        .orderBy(order, isDesc ? changeLog.id.desc() : changeLog.id.asc())
         .limit(request.getSize() + 1)
         .fetch();
 
@@ -104,11 +104,21 @@ public class ChangeLogRepositoryImpl implements ChangeLogRepositoryCustom {
       return null;
     }
 
-    return changeLog.createdAt.lt(request.getCursor())
-        .or(
-            changeLog.createdAt.eq(request.getCursor())
-                .and(changeLog.id.lt(request.getIdAfter()))
-        );
+    boolean isDesc = request.getSortDirection() == Sort.Direction.DESC;
+    return switch (request.getSortField()) {
+      case at -> {
+        Instant cursor = Instant.parse(request.getCursor());
+        yield isDesc
+            ? changeLog.createdAt.lt(cursor).or(changeLog.createdAt.eq(cursor).and(changeLog.id.lt(request.getIdAfter())))
+            : changeLog.createdAt.gt(cursor).or(changeLog.createdAt.eq(cursor).and(changeLog.id.gt(request.getIdAfter())));
+      }
+      case ipAddress -> {
+        String cursor = request.getCursor();
+        yield isDesc
+            ? changeLog.ipAddress.lt(cursor).or(changeLog.ipAddress.eq(cursor).and(changeLog.id.lt(request.getIdAfter())))
+            : changeLog.ipAddress.gt(cursor).or(changeLog.ipAddress.eq(cursor).and(changeLog.id.gt(request.getIdAfter())));
+      }
+    };
   }
 
   private OrderSpecifier<?> getOrder(ChangeLogListRequest request) {

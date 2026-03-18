@@ -20,7 +20,7 @@ public class ChangeLogListRequest{
   private Instant atFrom;
   private Instant atTo;
   private Long idAfter;
-  private Instant cursor;
+  private String cursor;
 
   @Min(1)
   @Max(100)
