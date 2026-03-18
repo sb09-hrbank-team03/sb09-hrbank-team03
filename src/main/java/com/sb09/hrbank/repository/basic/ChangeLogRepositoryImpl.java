@@ -4,6 +4,7 @@ import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.sb09.hrbank.dto.request.ChangeLogListRequest;
+import com.sb09.hrbank.dto.request.ChangeLogSortField;
 import com.sb09.hrbank.entity.ChangeLog;
 import com.sb09.hrbank.entity.ChangeType;
 import com.sb09.hrbank.entity.QChangeLog;
@@ -27,8 +28,10 @@ public class ChangeLogRepositoryImpl implements ChangeLogRepositoryCustom {
   @Override
   public Slice<ChangeLog> searchChangeLogs(ChangeLogListRequest request) {
 
-    OrderSpecifier<?> order = getOrder(request);
     boolean isDesc = request.getSortDirection() == Sort.Direction.DESC;
+    OrderSpecifier<?> order = getOrder(request);
+    OrderSpecifier<?> idOrder = isDesc ? changeLog.id.desc() : changeLog.id.asc();
+
     List<ChangeLog> results = queryFactory
         .selectFrom(changeLog)
         .where(
@@ -40,7 +43,7 @@ public class ChangeLogRepositoryImpl implements ChangeLogRepositoryCustom {
             atLoe(request.getAtTo()),
             cursorCondition(request)
         )
-        .orderBy(order, isDesc ? changeLog.id.desc() : changeLog.id.asc())
+        .orderBy(order, idOrder)
         .limit(request.getSize() + 1)
         .fetch();
 
@@ -100,25 +103,42 @@ public class ChangeLogRepositoryImpl implements ChangeLogRepositoryCustom {
 
   private BooleanExpression cursorCondition(ChangeLogListRequest request) {
 
-    if (request.getCursor() == null || request.getIdAfter() == null) {
+    if (request.getIdAfter() == null) {
       return null;
     }
 
     boolean isDesc = request.getSortDirection() == Sort.Direction.DESC;
-    return switch (request.getSortField()) {
-      case at -> {
-        Instant cursor = Instant.parse(request.getCursor());
-        yield isDesc
-            ? changeLog.createdAt.lt(cursor).or(changeLog.createdAt.eq(cursor).and(changeLog.id.lt(request.getIdAfter())))
-            : changeLog.createdAt.gt(cursor).or(changeLog.createdAt.eq(cursor).and(changeLog.id.gt(request.getIdAfter())));
+    String cursor = request.getCursor();
+
+    if (request.getSortField() == ChangeLogSortField.at && cursor != null) {
+      Instant cursorInstant = Instant.parse(cursor);
+      if (isDesc) {
+        return changeLog.createdAt.lt(cursorInstant)
+            .or(changeLog.createdAt.eq(cursorInstant)
+                .and(changeLog.id.lt(request.getIdAfter())));
+      } else {
+        return changeLog.createdAt.gt(cursorInstant)
+            .or(changeLog.createdAt.eq(cursorInstant)
+                .and(changeLog.id.gt(request.getIdAfter())));
       }
-      case ipAddress -> {
-        String cursor = request.getCursor();
-        yield isDesc
-            ? changeLog.ipAddress.lt(cursor).or(changeLog.ipAddress.eq(cursor).and(changeLog.id.lt(request.getIdAfter())))
-            : changeLog.ipAddress.gt(cursor).or(changeLog.ipAddress.eq(cursor).and(changeLog.id.gt(request.getIdAfter())));
+    }
+
+    if (request.getSortField() == ChangeLogSortField.ipAddress && cursor != null) {
+      if (isDesc) {
+        return changeLog.ipAddress.lt(cursor)
+            .or(changeLog.ipAddress.eq(cursor)
+                .and(changeLog.id.lt(request.getIdAfter())));
+      } else {
+        return changeLog.ipAddress.gt(cursor)
+            .or(changeLog.ipAddress.eq(cursor)
+                .and(changeLog.id.gt(request.getIdAfter())));
       }
-    };
+    }
+
+    // cursor가 없는 경우 id만으로 페이지네이션
+    return isDesc
+        ? changeLog.id.lt(request.getIdAfter())
+        : changeLog.id.gt(request.getIdAfter());
   }
 
   private OrderSpecifier<?> getOrder(ChangeLogListRequest request) {

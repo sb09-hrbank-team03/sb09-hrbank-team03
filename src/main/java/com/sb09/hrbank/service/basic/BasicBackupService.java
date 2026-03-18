@@ -3,6 +3,7 @@ package com.sb09.hrbank.service.basic;
 import com.sb09.hrbank.backup.CsvBackupWriter;
 import com.sb09.hrbank.dto.common.CursorPageResponse;
 import com.sb09.hrbank.dto.request.BackupListRequest;
+import com.sb09.hrbank.dto.request.BackupSortField;
 import com.sb09.hrbank.dto.response.BackupDto;
 import com.sb09.hrbank.entity.BackupHistory;
 import com.sb09.hrbank.entity.BackupStatus;
@@ -112,7 +113,11 @@ public class BasicBackupService implements BackupService {
     return cursorMapper.fromSlice(
         slice,
         backupMapper::toDto,
-        history -> history.getStartedAt() != null ? history.getStartedAt().toString() : null,
+        history -> switch (request.getSortField()) {
+          case startedAt -> history.getStartedAt() != null ? history.getStartedAt().toString() : null;
+          case endedAt   -> history.getEndedAt()   != null ? history.getEndedAt().toString()   : null;
+          case status    -> history.getBackupStatus() != null ? history.getBackupStatus().name() : null;
+        },
         BackupHistory::getId,
         totalElements
     );
