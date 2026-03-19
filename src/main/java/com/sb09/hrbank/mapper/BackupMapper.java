@@ -12,7 +12,7 @@ import java.time.format.DateTimeFormatter;
 public interface BackupMapper {
 
   ZoneId KST = ZoneId.of("Asia/Seoul");
-  DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
+  DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssXXX");
 
   @Mapping(source = "ipAddress", target = "worker")
   @Mapping(source = "backupStatus", target = "status")
