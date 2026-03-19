@@ -71,7 +71,7 @@ public class BasicFileService implements FileService {
 
   @Override
   public FileMeta saveProfileImage(MultipartFile profileImage) {
-    if (profileImage == null || profileImage.isEmpty()) {
+    if (profileImage == null || profileImage.isEmpty() || profileImage.getSize() == 0) {
       throw new IllegalArgumentException("업로드할 프로필 이미지가 비어 있습니다.");
     }
 
