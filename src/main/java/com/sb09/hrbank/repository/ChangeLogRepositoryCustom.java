@@ -6,4 +6,5 @@ import org.springframework.data.domain.Slice;
 
 public interface ChangeLogRepositoryCustom {
   Slice<ChangeLog> searchChangeLogs(ChangeLogListRequest request);
+  Long countChangeLogs(ChangeLogListRequest request);
 }
