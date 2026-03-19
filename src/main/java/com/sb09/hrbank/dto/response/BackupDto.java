@@ -1,12 +1,13 @@
 package com.sb09.hrbank.dto.response;
 
 import com.sb09.hrbank.entity.BackupStatus;
+import java.time.Instant;
 
 public record BackupDto(
     Long id,
     String worker,
-    String startedAt,
-    String endedAt,
+    Instant startedAt,
+    Instant endedAt,
     BackupStatus status,
     Long fileId
 ) {}
