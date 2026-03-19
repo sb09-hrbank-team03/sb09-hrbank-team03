@@ -60,6 +60,22 @@ public class ChangeLogRepositoryImpl implements ChangeLogRepositoryCustom {
     );
   }
 
+  @Override
+  public Long countChangeLogs(ChangeLogListRequest request){
+    return queryFactory
+        .select(changeLog.count())
+        .from(changeLog)
+        .where(
+            employeeNumberContains(request.getEmployeeNumber()),
+            typeEq(request.getType()),
+            memoContains(request.getMemo()),
+            ipAddressContains(request.getIpAddress()),
+            atGoe(request.getAtFrom()),
+            atLoe(request.getAtTo())
+        )
+        .fetchOne();
+  }
+
   private BooleanExpression employeeNumberContains(String number){
     if(number == null || number.isBlank()){
       return null;
@@ -151,4 +167,5 @@ public class ChangeLogRepositoryImpl implements ChangeLogRepositoryCustom {
       case ipAddress -> isDesc ? changeLog.ipAddress.desc() : changeLog.ipAddress.asc();
     };
   }
+
 }
