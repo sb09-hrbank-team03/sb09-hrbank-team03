@@ -157,7 +157,7 @@ public class BasicEmployeeService implements EmployeeService {
   }
 
   private Long getProfileImageId(MultipartFile profileImage) {
-    if (profileImage == null || profileImage.isEmpty()) {
+    if (profileImage == null || profileImage.isEmpty() || profileImage.getSize() == 0) {
       return null;
     }
     return fileService.saveProfileImage(profileImage).getId();
