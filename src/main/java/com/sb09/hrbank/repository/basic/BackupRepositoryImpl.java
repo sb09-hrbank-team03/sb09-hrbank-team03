@@ -65,6 +65,7 @@ public class BackupRepositoryImpl implements BackupRepositoryCustom {
   }
 
   private BooleanExpression startedAtGoe(Instant from) {
+    if (from == null) return null;
     ZonedDateTime zdt = from.atZone(ZoneId.of("Asia/Seoul"));
     Instant startOfDayKst = zdt.toLocalDate().atStartOfDay(ZoneId.of("Asia/Seoul")).toInstant();
     return backup.startedAt.goe(startOfDayKst);
