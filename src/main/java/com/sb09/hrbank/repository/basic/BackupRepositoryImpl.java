@@ -81,7 +81,12 @@ public class BackupRepositoryImpl implements BackupRepositoryCustom {
     if (request.getIdAfter() == null) return null;
 
     boolean isDesc = request.getSortDirection() == Sort.Direction.DESC;
-    Instant cursorInstant = request.getCursor() != null ? Instant.parse(request.getCursor()) : null;
+    Instant cursorInstant = null;
+    if (request.getCursor() != null
+        && (request.getSortField() == BackupSortField.startedAt
+            || request.getSortField() == BackupSortField.endedAt)) {
+      cursorInstant = Instant.parse(request.getCursor());
+    }
 
     if (request.getSortField() == BackupSortField.startedAt && cursorInstant != null) {
       return isDesc
@@ -99,7 +104,7 @@ public class BackupRepositoryImpl implements BackupRepositoryCustom {
               .or(backup.endedAt.eq(cursorInstant).and(backup.id.gt(request.getIdAfter())));
     }
 
-    if (request.getSortField() == BackupSortField.status && cursorInstant != null) {
+    if (request.getSortField() == BackupSortField.status && request.getCursor() != null) {
       String cursor = request.getCursor();
       return isDesc
           ? backup.backupStatus.stringValue().lt(cursor)
