@@ -17,6 +17,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
 
 import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.List;
 
 @Repository
@@ -24,7 +26,6 @@ import java.util.List;
 public class BackupRepositoryImpl implements BackupRepositoryCustom {
 
   private final JPAQueryFactory queryFactory;
-
   private final QBackupHistory backup = QBackupHistory.backupHistory;
 
   @Override
@@ -48,114 +49,74 @@ public class BackupRepositoryImpl implements BackupRepositoryCustom {
         .fetch();
 
     boolean hasNext = results.size() > request.getSize();
+    if (hasNext) results.remove(request.getSize());
 
-    if (hasNext) {
-      results.remove(request.getSize());
-    }
-
-    return new SliceImpl<>(
-        results,
-        PageRequest.of(0, request.getSize()),
-        hasNext
-    );
+    return new SliceImpl<>(results, PageRequest.of(0, request.getSize()), hasNext);
   }
 
   private BooleanExpression workerContains(String worker) {
-    if (worker == null || worker.isBlank()) {
-      return null;
-    }
+    if (worker == null || worker.isBlank()) return null;
     return backup.ipAddress.contains(worker);
   }
 
   private BooleanExpression statusEq(BackupStatus status) {
-    if (status == null) {
-      return null;
-    }
+    if (status == null) return null;
     return backup.backupStatus.eq(status);
   }
 
   private BooleanExpression startedAtGoe(Instant from) {
-    if (from == null) {
-      return null;
-    }
-    return backup.startedAt.goe(from);
+    ZonedDateTime zdt = from.atZone(ZoneId.of("Asia/Seoul"));
+    Instant startOfDayKst = zdt.toLocalDate().atStartOfDay(ZoneId.of("Asia/Seoul")).toInstant();
+    return backup.startedAt.goe(startOfDayKst);
   }
 
   private BooleanExpression startedAtLoe(Instant to) {
-    if (to == null) {
-      return null;
-    }
-    return backup.startedAt.loe(to);
+    if (to == null) return null;
+    ZonedDateTime zdt = to.atZone(ZoneId.of("Asia/Seoul"));
+    Instant endOfDayKst = zdt.toLocalDate().plusDays(1).atStartOfDay(ZoneId.of("Asia/Seoul")).toInstant().minusNanos(1);
+    return backup.startedAt.loe(endOfDayKst);
   }
 
   private BooleanExpression cursorCondition(BackupListRequest request) {
-
-    if (request.getIdAfter() == null) {
-      return null;
-    }
+    if (request.getIdAfter() == null) return null;
 
     boolean isDesc = request.getSortDirection() == Sort.Direction.DESC;
-    String cursor = request.getCursor();
+    Instant cursorInstant = request.getCursor() != null ? Instant.parse(request.getCursor()) : null;
 
-    if (request.getSortField() == BackupSortField.startedAt && cursor != null) {
-      Instant cursorInstant = Instant.parse(cursor);
-      if (isDesc) {
-        return backup.startedAt.lt(cursorInstant)
-            .or(backup.startedAt.eq(cursorInstant)
-                .and(backup.id.lt(request.getIdAfter())));
-      } else {
-        return backup.startedAt.gt(cursorInstant)
-            .or(backup.startedAt.eq(cursorInstant)
-                .and(backup.id.gt(request.getIdAfter())));
-      }
+    if (request.getSortField() == BackupSortField.startedAt && cursorInstant != null) {
+      return isDesc
+          ? backup.startedAt.lt(cursorInstant)
+          .or(backup.startedAt.eq(cursorInstant).and(backup.id.lt(request.getIdAfter())))
+          : backup.startedAt.gt(cursorInstant)
+              .or(backup.startedAt.eq(cursorInstant).and(backup.id.gt(request.getIdAfter())));
     }
 
-    if (request.getSortField() == BackupSortField.endedAt && cursor != null) {
-      Instant cursorInstant = Instant.parse(cursor);
-      if (isDesc) {
-        return backup.endedAt.lt(cursorInstant)
-            .or(backup.endedAt.eq(cursorInstant)
-                .and(backup.id.lt(request.getIdAfter())));
-      } else {
-        return backup.endedAt.gt(cursorInstant)
-            .or(backup.endedAt.eq(cursorInstant)
-                .and(backup.id.gt(request.getIdAfter())));
-      }
+    if (request.getSortField() == BackupSortField.endedAt && cursorInstant != null) {
+      return isDesc
+          ? backup.endedAt.lt(cursorInstant)
+          .or(backup.endedAt.eq(cursorInstant).and(backup.id.lt(request.getIdAfter())))
+          : backup.endedAt.gt(cursorInstant)
+              .or(backup.endedAt.eq(cursorInstant).and(backup.id.gt(request.getIdAfter())));
     }
 
-    if (request.getSortField() == BackupSortField.status && cursor != null) {
-      // status는 문자열(EnumType.STRING)로 저장되므로 문자열 비교 사용
-      if (isDesc) {
-        return backup.backupStatus.stringValue().lt(cursor)
-            .or(backup.backupStatus.stringValue().eq(cursor)
-                .and(backup.id.lt(request.getIdAfter())));
-      } else {
-        return backup.backupStatus.stringValue().gt(cursor)
-            .or(backup.backupStatus.stringValue().eq(cursor)
-                .and(backup.id.gt(request.getIdAfter())));
-      }
+    if (request.getSortField() == BackupSortField.status && cursorInstant != null) {
+      String cursor = request.getCursor();
+      return isDesc
+          ? backup.backupStatus.stringValue().lt(cursor)
+          .or(backup.backupStatus.stringValue().eq(cursor).and(backup.id.lt(request.getIdAfter())))
+          : backup.backupStatus.stringValue().gt(cursor)
+              .or(backup.backupStatus.stringValue().eq(cursor).and(backup.id.gt(request.getIdAfter())));
     }
 
-    // cursor가 없는 경우 id만으로 페이지네이션
-    return isDesc
-        ? backup.id.lt(request.getIdAfter())
-        : backup.id.gt(request.getIdAfter());
+    return isDesc ? backup.id.lt(request.getIdAfter()) : backup.id.gt(request.getIdAfter());
   }
 
   private OrderSpecifier<?> getOrder(BackupListRequest request) {
-
     boolean isDesc = request.getSortDirection() == Sort.Direction.DESC;
-
     return switch (request.getSortField()) {
-
-      case startedAt ->
-          isDesc ? backup.startedAt.desc() : backup.startedAt.asc();
-
-      case endedAt ->
-          isDesc ? backup.endedAt.desc() : backup.endedAt.asc();
-
-      case status ->
-          isDesc ? backup.backupStatus.desc() : backup.backupStatus.asc();
+      case startedAt -> isDesc ? backup.startedAt.desc() : backup.startedAt.asc();
+      case endedAt -> isDesc ? backup.endedAt.desc() : backup.endedAt.asc();
+      case status -> isDesc ? backup.backupStatus.desc() : backup.backupStatus.asc();
     };
   }
 }
