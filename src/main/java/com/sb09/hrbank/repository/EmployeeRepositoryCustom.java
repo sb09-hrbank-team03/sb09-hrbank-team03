@@ -7,4 +7,6 @@ import org.springframework.data.domain.Slice;
 public interface EmployeeRepositoryCustom {
 
   Slice<EmployeeDto> searchEmployees(EmployeeSearchRequest request);
+
+  long countEmployees(EmployeeSearchRequest request);
 }
