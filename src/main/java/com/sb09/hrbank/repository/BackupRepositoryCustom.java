@@ -7,4 +7,5 @@ import org.springframework.data.domain.Slice;
 public interface BackupRepositoryCustom {
 
   Slice<BackupHistory> searchBackups(BackupListRequest request);
+  Long countBackups(BackupListRequest request);
 }
