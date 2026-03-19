@@ -52,16 +52,8 @@ public class EmployeeRepositoryImpl implements EmployeeRepositoryCustom {
         )
         .from(employee)
         .join(employee.department, department)
-        .where(
-            nameOrEmailContains(request.getNameOrEmail()),
-            departmentNameContains(request.getDepartmentName()),
-            positionContains(request.getPosition()),
-            employeeNumberContains(request.getEmployeeNumber()),
-            hireDateFromGoe(request.getHireDateFrom()),
-            hireDateToLoe(request.getHireDateTo()),
-            statusEq(request),
-            cursorCondition(request)
-        )
+        .where(searchConditions(request))
+        .where(cursorCondition(request))
         .orderBy(primaryOrder(request), idOrder(request))
         .limit(size + 1L)
         .fetch();
@@ -71,6 +63,30 @@ public class EmployeeRepositoryImpl implements EmployeeRepositoryCustom {
       results.remove(size);
     }
     return new SliceImpl<>(results, PageRequest.of(0, size), hasNext);
+  }
+
+  @Override
+  public long countEmployees(EmployeeSearchRequest request) {
+    Long count = queryFactory
+        .select(employee.count())
+        .from(employee)
+        .join(employee.department, department)
+        .where(searchConditions(request))
+        .fetchOne();
+
+    return count != null ? count : 0L;
+  }
+
+  private BooleanExpression[] searchConditions(EmployeeSearchRequest request) {
+    return new BooleanExpression[] {
+        nameOrEmailContains(request.getNameOrEmail()),
+        departmentNameContains(request.getDepartmentName()),
+        positionContains(request.getPosition()),
+        employeeNumberContains(request.getEmployeeNumber()),
+        hireDateFromGoe(request.getHireDateFrom()),
+        hireDateToLoe(request.getHireDateTo()),
+        statusEq(request)
+    };
   }
 
   private BooleanExpression nameOrEmailContains(String nameOrEmail) {
@@ -125,7 +141,7 @@ public class EmployeeRepositoryImpl implements EmployeeRepositoryCustom {
   }
 
   private BooleanExpression cursorCondition(EmployeeSearchRequest request) {
-    if (request.getCursor() == null || request.getIdAfter() == null) {
+    if (request.getCursor() == null) {
       return null;
     }
 
@@ -156,11 +172,18 @@ public class EmployeeRepositoryImpl implements EmployeeRepositoryCustom {
       Sort.Direction direction
   ) {
     if (direction == Sort.Direction.DESC) {
-      return field.lt(cursor)
-          .or(field.eq(cursor).and(employee.id.lt(lastElementId)));
+      BooleanExpression primary = field.lt(cursor);
+      if (lastElementId == null) {
+        return primary;
+      }
+      return primary.or(field.eq(cursor).and(employee.id.lt(lastElementId)));
     }
-    return field.gt(cursor)
-        .or(field.eq(cursor).and(employee.id.gt(lastElementId)));
+
+    BooleanExpression primary = field.gt(cursor);
+    if (lastElementId == null) {
+      return primary;
+    }
+    return primary.or(field.eq(cursor).and(employee.id.gt(lastElementId)));
   }
 
   private OrderSpecifier<?> primaryOrder(EmployeeSearchRequest request) {
