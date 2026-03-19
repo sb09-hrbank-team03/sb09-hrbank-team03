@@ -54,6 +54,20 @@ public class BackupRepositoryImpl implements BackupRepositoryCustom {
     return new SliceImpl<>(results, PageRequest.of(0, request.getSize()), hasNext);
   }
 
+  @Override
+  public Long countBackups(BackupListRequest request) {
+    return queryFactory
+        .select(backup.count())
+        .from(backup)
+        .where(
+            workerContains(request.getWorker()),
+            statusEq(request.getStatus()),
+            startedAtGoe(request.getStartedAtFrom()),
+            startedAtLoe(request.getStartedAtTo())
+        )
+        .fetchOne();
+  }
+
   private BooleanExpression workerContains(String worker) {
     if (worker == null || worker.isBlank()) return null;
     return backup.ipAddress.contains(worker);

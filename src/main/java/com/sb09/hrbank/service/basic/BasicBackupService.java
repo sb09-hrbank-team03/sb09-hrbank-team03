@@ -97,7 +97,7 @@ public class BasicBackupService implements BackupService {
   @Transactional(readOnly = true)
   public CursorPageResponse<BackupDto> getBackups(BackupListRequest request) {
     var slice = backupRepository.searchBackups(request);
-    Long totalElements = backupRepository.count();
+    Long totalElements = backupRepository.countBackups(request);
 
     return cursorMapper.fromSlice(
         slice,
