@@ -1,6 +1,7 @@
 package com.sb09.hrbank.service.basic;
 
 import com.sb09.hrbank.dto.request.DepartmentUpdateRequest;
+import com.sb09.hrbank.entity.WorkStatus;
 import com.sb09.hrbank.repository.EmployeeRepository;
 import java.util.NoSuchElementException;
 import org.springframework.transaction.annotation.Transactional;
@@ -69,7 +70,7 @@ public class BasicDepartmentService implements DepartmentService {
 
     department.update(request.name(), request.description(), request.establishedDate());
 
-    Long employeeCount = employeeRepository.countByDepartmentId(department.getId());
+    Long employeeCount = employeeRepository.countActiveAndOnLeaveByDepartmentId(department.getId(), WorkStatus.ACTIVE, WorkStatus.ON_LEAVE);
     return departmentMapper.toDto(department, employeeCount);
   }
 
@@ -110,10 +111,12 @@ public class BasicDepartmentService implements DepartmentService {
     }
     List<Object[]> results = entityManager.createQuery(
             "SELECT e.department.id, COUNT(e) FROM Employee e " +
-                "WHERE e.department.id IN :departmentIds " +
+                "WHERE e.department.id IN :departmentIds AND (e.status = :active OR e.status = :onLeave) " +
                 "GROUP BY e.department.id",
             Object[].class)
         .setParameter("departmentIds", departmentIds)
+        .setParameter("active", WorkStatus.ACTIVE)
+        .setParameter("onLeave", WorkStatus.ON_LEAVE)
         .getResultList();
     Map<Long, Long> employeeCountMap = new HashMap<>();
     for (Object[] row : results) {
@@ -130,7 +133,7 @@ public class BasicDepartmentService implements DepartmentService {
     Department department = departmentRepository.findById(id)
         .orElseThrow(() -> new NoSuchElementException("존재하지 않는 부서입니다."));
 
-    Long employeeCount = employeeRepository.countByDepartmentId(department.getId());
+    Long employeeCount = employeeRepository.countActiveAndOnLeaveByDepartmentId(department.getId(), WorkStatus.ACTIVE, WorkStatus.ON_LEAVE);
     return departmentMapper.toDto(department, employeeCount);
   }
 
@@ -140,8 +143,10 @@ public class BasicDepartmentService implements DepartmentService {
     Department department = departmentRepository.findById(id)
         .orElseThrow(() -> new NoSuchElementException("존재하지 않는 부서입니다."));
 
-    if (employeeRepository.existsByDepartmentId(id)) {
-      throw new IllegalStateException("소속 직원이 있는 부서는 삭제할 수 없습니다.");
+    // ACTIVE 또는 ON_LEAVE 상태의 직원이 있으면 삭제 불가
+    long activeOrOnLeaveCount = employeeRepository.countActiveAndOnLeaveByDepartmentId(id, WorkStatus.ACTIVE, WorkStatus.ON_LEAVE);
+    if (activeOrOnLeaveCount > 0) {
+      throw new IllegalStateException("소속 직원이 있는 부서는 삭제할 수 없습니다. (재직/휴직: " + activeOrOnLeaveCount + "명)");
     }
     departmentRepository.delete(department);
   }
