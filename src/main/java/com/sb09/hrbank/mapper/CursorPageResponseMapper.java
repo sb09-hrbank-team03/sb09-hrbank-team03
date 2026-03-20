@@ -27,7 +27,7 @@ public class CursorPageResponseMapper {
         dtos,
         nextCursor,
         nextIdAfter,
-        slice.getSize(),
+        dtos.size(),
         totalElements,
         slice.hasNext()
     );
