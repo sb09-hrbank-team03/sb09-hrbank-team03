@@ -39,7 +39,6 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long>,
 
   Long countByHireDateBetweenAndStatus(LocalDate from, LocalDate to, WorkStatus status);
 
-  boolean existsByDepartmentId(Long departmentId);
-
-  long countByDepartmentId(Long departmentId);
+  @Query("SELECT COUNT(e) FROM Employee e WHERE e.department.id = :departmentId AND (e.status = :active OR e.status = :onLeave)")
+  long countActiveAndOnLeaveByDepartmentId(@Param("departmentId") Long departmentId, @Param("active") WorkStatus active, @Param("onLeave") WorkStatus onLeave);
 }
